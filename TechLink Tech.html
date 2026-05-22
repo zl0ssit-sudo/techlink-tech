@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TechLink فني">
+<meta name="theme-color" content="#07090f">
+<title>TechLink — تطبيق الفني</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, doc, updateDoc, setDoc, getDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const cfg = {
+  apiKey:"AIzaSyCqJokUc0LbG4387K0uLSe2i_anBSsG-dM",
+  authDomain:"command-fix.firebaseapp.com",
+  projectId:"command-fix",
+  storageBucket:"command-fix.firebasestorage.app",
+  messagingSenderId:"218796531794",
+  appId:"1:218796531794:web:751ff2fa49e216cb023f8b"
+};
+try {
+  const app     = initializeApp(cfg);
+  const db      = getFirestore(app);
+  const auth    = getAuth(app);
+  const storage = getStorage(app);
+  window._db=db; window._auth=auth; window._storage=storage;
+  window._col       = c => collection(db,c);
+  window._addDoc    = addDoc;
+  window._setDoc    = (c,id,d) => setDoc(doc(db,c,id),d,{merge:true});
+  window._getDoc    = (c,id)   => getDoc(doc(db,c,id));
+  window._updateDoc = (c,id,d) => updateDoc(doc(db,c,id),d);
+  window._onSnap    = onSnapshot;
+  window._doc       = (c,id)   => doc(db,c,id);
+  window._query     = query;
+  window._where     = where;
+  window._orderBy   = orderBy;
+  window._serverTs  = serverTimestamp;
+  window._fbReady   = true;
+  window._initRec   = () => { if(!window._rec) window._rec=new RecaptchaVerifier(auth,'recaptcha-box',{size:'invisible'}); };
+  window._sendOTP   = p  => { window._initRec(); return signInWithPhoneNumber(auth,p,window._rec); };
+  window._fbLogout  = ()  => signOut(auth);
+  window._authState = cb  => onAuthStateChanged(auth,cb);
+  window._uploadFile = async (path, file) => {
+    const r = ref(storage, path);
+    await uploadBytes(r, file);
+    return getDownloadURL(r);
+  };
+} catch(e){ window._fbReady=false; console.warn('Firebase',e); }
+</script>
+
+<style>
+:root{
+  --bg:#07090f;--s1:#0e1117;--s2:#141820;--s3:#1a1f2e;
+  --bd:#1f2535;--gold:#f0a500;--gold2:#e06c00;
+  --blue:#3b82f6;--green:#10b981;--red:#ef4444;--orange:#f97316;
+  --text:#eef0f6;--muted:#64748b;
+  --sans:'Cairo',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sb:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--sans);color:var(--text)}
+
+/* SCREENS */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg);z-index:10;overflow:hidden}
+.screen.active{display:flex}
+
+/* SPLASH */
+#splash{align-items:center;justify-content:center;gap:16px}
+.splash-logo{width:90px;height:90px;border-radius:24px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 0 60px rgba(240,165,0,.3);animation:glow 2s ease infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 40px rgba(240,165,0,.3)}50%{box-shadow:0 0 80px rgba(240,165,0,.5)}}
+.splash-title{font-size:30px;font-weight:900}.splash-title span{color:var(--gold)}
+.splash-sub{font-size:14px;color:var(--muted)}
+.splash-loader{width:36px;height:36px;border:3px solid rgba(240,165,0,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-top:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AUTH */
+#auth{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.auth-wrap{padding:24px;min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding-top:40px}
+.auth-card{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:28px 22px;width:100%;max-width:420px}
+.auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:20px}
+.auth-logo-ic{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:20px}
+.auth-logo-txt{font-size:22px;font-weight:900}.auth-logo-txt span{color:var(--gold)}
+.auth-tabs{display:flex;background:var(--s2);border-radius:10px;padding:4px;margin-bottom:18px}
+.auth-tab{flex:1;padding:8px;text-align:center;cursor:pointer;border-radius:7px;font-size:13px;font-weight:700;color:var(--muted);transition:all .15s}
+.auth-tab.on{background:var(--s1);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.step-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.step-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.fi{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;color:var(--text);font-family:var(--sans);font-size:14px;width:100%;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,165,0,.08)}
+.fs{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;color:var(--text);font-family:var(--sans);font-size:14px;width:100%;outline:none}
+.fs option{background:var(--s2)}
+.fr{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-main{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f;font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:6px}
+.btn-main:active{opacity:.85}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{width:100%;padding:11px;border-radius:11px;background:transparent;border:1px solid var(--bd);color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;margin-top:8px}
+.auth-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:12px;padding:10px 13px;border-radius:8px;margin-bottom:12px;display:none;text-align:center}
+
+/* PHOTO UPLOAD */
+.photo-upload{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:12px}
+.photo-circle{width:80px;height:80px;border-radius:50%;background:var(--s2);border:2px dashed var(--bd);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;overflow:hidden;transition:border-color .15s}
+.photo-circle:hover{border-color:var(--gold)}
+.photo-circle img{width:100%;height:100%;object-fit:cover}
+.photo-lbl{font-size:12px;color:var(--muted)}
+
+/* FILE UPLOAD */
+.file-upload{background:var(--s2);border:1px dashed var(--bd);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;transition:border-color .15s}
+.file-upload:hover{border-color:var(--gold)}
+.file-upload-ic{font-size:24px}
+.file-upload-info{flex:1}
+.file-upload-lbl{font-size:13px;font-weight:600}
+.file-upload-sub{font-size:11px;color:var(--muted)}
+.file-done{border-color:var(--green)!important;background:rgba(16,185,129,.05)!important}
+
+/* OTP */
+.otp-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px;direction:ltr}
+.otp-box{width:46px;height:52px;background:var(--s2);border:2px solid var(--bd);border-radius:10px;text-align:center;font-size:22px;font-weight:700;color:var(--text);outline:none;transition:border-color .15s}
+.otp-box:focus{border-color:var(--gold)}
+.resend-row{text-align:center;font-size:12px;color:var(--muted);margin-top:10px}
+.resend-btn{color:var(--gold);cursor:pointer;font-weight:700;display:none}
+
+/* PENDING SCREEN */
+#pending{align-items:center;justify-content:center;text-align:center;padding:32px}
+.pending-ic{font-size:64px;margin-bottom:16px}
+.pending-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.pending-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.pending-status{display:inline-flex;align-items:center;gap:8px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:var(--orange);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700}
+
+/* MAIN APP */
+#app{overflow:hidden}
+.topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.topbar-l{display:flex;align-items:center;gap:8px}
+.topbar-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#07090f;overflow:hidden}
+.topbar-av img{width:100%;height:100%;object-fit:cover}
+.topbar-name{font-size:15px;font-weight:700}
+.topbar-spec{font-size:11px;color:var(--muted)}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.online-toggle{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s}
+.online-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(60px + var(--sb))}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--bd);display:flex;padding-bottom:var(--sb);z-index:100}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:700;transition:color .15s}
+.bn.on{color:var(--gold)}.bn-ic{font-size:22px}
+.bn-badge{position:relative}.bn-badge::after{content:attr(data-count);position:absolute;top:-4px;right:-8px;background:var(--red);color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+
+/* PAGE */
+.page{display:none;padding:14px}.page.on{display:block}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.stat-val{font-size:24px;font-weight:900;font-family:var(--mono)}
+.stat-val.g{color:var(--gold)}.stat-val.gr{color:var(--green)}.stat-val.b{color:var(--blue)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ORDER CARD */
+.order-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.order-card.new-order{border-color:var(--gold);animation:newPulse 1.5s ease 3}
+@keyframes newPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 20px rgba(240,165,0,.3)}}
+.oc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.oc-service{display:flex;align-items:center;gap:8px}
+.oc-service-ic{width:42px;height:42px;border-radius:12px;background:rgba(240,165,0,.1);display:flex;align-items:center;justify-content:center;font-size:20px}
+.oc-service-name{font-size:15px;font-weight:700}
+.oc-service-sub{font-size:11px;color:var(--muted)}
+.oc-id{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.oc-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.oci{background:var(--s2);border-radius:8px;padding:8px 10px}
+.oci-lbl{font-size:10px;color:var(--muted);margin-bottom:2px}
+.oci-val{font-size:13px;font-weight:700}
+.oc-actions{display:flex;gap:8px}
+.oc-btn{flex:1;padding:10px;border-radius:10px;border:none;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.oc-btn-accept{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
+.oc-btn-reject{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+.oc-btn-nav{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+.oc-btn-done{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f}
+.oc-btn-call{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:var(--green);width:44px;flex:none}
+.oc-btn-msg{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--blue);width:44px;flex:none}
+
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.t-pend{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.2)}
+.t-prog{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.t-done{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.t-cancel{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* MAP */
+#nav-map{height:300px;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px}
+.leaflet-container{background:#1a1f2e !important}
+.leaflet-routing-container{display:none !important}
+
+/* WALLET */
+.w-hero{background:linear-gradient(135deg,#0f1623,#1a2035);border:1px solid rgba(240,165,0,.2);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center}
+.w-bal{font-size:34px;font-weight:900;color:var(--gold);font-family:var(--mono)}
+.w-lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+.w-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 13px;font-size:12px;color:var(--red);margin-bottom:12px;display:none}
+.txn-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}
+.txn-item:last-child{border-bottom:none}
+.txn-ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.txn-ic.in{background:rgba(16,185,129,.1)}.txn-ic.out{background:rgba(239,68,68,.1)}
+.txn-name{font-size:13px;font-weight:600}.txn-date{font-size:10px;color:var(--muted)}
+.txn-amt{font-family:var(--mono);font-weight:700;font-size:13px}
+.txn-amt.in{color:var(--green)}.txn-amt.out{color:var(--red)}
+
+/* PROFILE */
+.profile-av-lg{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#07090f;margin:0 auto 12px;overflow:hidden}
+.profile-av-lg img{width:100%;height:100%;object-fit:cover}
+.rating-row{display:flex;align-items:center;gap:4px;justify-content:center;margin-top:6px}
+.star{color:var(--gold);font-size:16px}
+.profile-sec{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.pi{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--bd)}
+.pi:last-child{border-bottom:none}
+.pi-l{display:flex;align-items:center;gap:10px}
+.pi-ic{width:34px;height:34px;border-radius:9px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.pi-lbl{font-size:14px;font-weight:600}.pi-sub{font-size:11px;color:var(--muted)}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px)}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:75%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5}
+.msg-me{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-other{background:var(--s2);border:1px solid var(--bd);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-time{font-size:10px;opacity:.6;margin-top:3px}
+.chat-bar{display:flex;gap:8px;padding:10px 14px;background:var(--s1);border-top:1px solid var(--bd);padding-bottom:calc(10px + var(--sb))}
+.chat-fi{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:22px;padding:10px 15px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none}
+.send-btn{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:600;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.on{display:flex}
+.modal-sheet{background:var(--s1);border-radius:20px 20px 0 0;border:1px solid var(--bd);border-bottom:none;padding:18px 18px calc(18px + var(--sb));width:100%;max-width:500px;animation:slideUp .25s ease;max-height:90vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--bd);border-radius:4px;margin:0 auto 14px}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:14px}
+
+/* TOAST */
+#toasts{position:fixed;bottom:80px;left:12px;right:12px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--s1);border:1px solid var(--bd);border-right:3px solid var(--gold);border-radius:12px;padding:11px 15px;font-size:13px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.5);animation:tIn .2s ease}
+.toast.ok{border-right-color:var(--green)}.toast.err{border-right-color:var(--red)}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ic{font-size:48px;margin-bottom:10px;opacity:.3}
+.section-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="splash-logo">🔧</div>
+  <div class="splash-title">Tech<span>Link</span></div>
+  <div class="splash-sub">بوابة الفنيين المحترفين</div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="auth">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-ic">🔧</div>
+        <div class="auth-logo-txt">Tech<span>Link</span> <span style="color:var(--muted);font-size:14px">فني</span></div>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab on" id="atab-login" onclick="authTab('login')">تسجيل الدخول</div>
+        <div class="auth-tab" id="atab-reg" onclick="authTab('reg')">حساب جديد</div>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+
+      <!-- LOGIN -->
+      <div id="login-form">
+        <div class="step-title">مرحباً بعودتك</div>
+        <div class="step-sub">أدخل رقمك لتسجيل الدخول</div>
+        <div id="login-step1">
+          <div class="fr"><label class="fl">رقم الجوال</label>
+            <div style="margin-bottom:8px">
+              <select class="fs" id="t-country-select" onchange="onTechCountryChange()" style="font-size:14px;margin-bottom:8px">
+                <option value="IQ" selected>🇮🇶 العراق (+964) — 11 رقم</option>
+                <option value="SA">🇸🇦 السعودية (+966) — 9 أرقام</option>
+                <option value="AE">🇦🇪 الإمارات (+971) — 9 أرقام</option>
+                <option value="KW">🇰🇼 الكويت (+965) — 8 أرقام</option>
+                <option value="BH">🇧🇭 البحرين (+973) — 8 أرقام</option>
+                <option value="QA">🇶🇦 قطر (+974) — 8 أرقام</option>
+                <option value="OM">🇴🇲 عُمان (+968) — 8 أرقام</option>
+                <option value="JO">🇯🇴 الأردن (+962) — 9 أرقام</option>
+                <option value="EG">🇪🇬 مصر (+20) — 11 رقم</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;font-weight:700;white-space:nowrap" id="t-dial-display">🇮🇶 +964</div>
+              <input class="fi" type="tel" id="l-phone" placeholder="07xxxxxxxx" maxlength="11" inputmode="numeric">
+            </div>
+          </div>
+          <button class="btn-main" id="l-send-btn" onclick="loginSendOTP()">إرسال رمز التحقق</button>
+        </div>
+        <div id="login-step2" style="display:none">
+          <div class="step-sub" id="l-otp-sub">أُرسل الرمز إلى رقمك</div>
+          <div class="otp-row" style="direction:ltr">
+            <input class="otp-box" id="lo1" maxlength="1" inputmode="numeric" oninput="otpNext(this,'lo2')">
+            <input class="otp-box" id="lo2" maxlength="1" inputmode="numeric" oninput="otpNext(this,'lo3')" onkeydown="otpBack(this,event,'lo1')">
+            <input class="otp-box" id="lo3" maxlength="1" inputmode="numeric" oninput="otpNext(this,'lo4')" onkeydown="otpBack(this,event,'lo2')">
+            <input class="otp-box" id="lo4" maxlength="1" inputmode="numeric" oninput="otpNext(this,'lo5')" onkeydown="otpBack(this,event,'lo3')">
+            <input class="otp-box" id="lo5" maxlength="1" inputmode="numeric" oninput="otpNext(this,'lo6')" onkeydown="otpBack(this,event,'lo4')">
+            <input class="otp-box" id="lo6" maxlength="1" inputmode="numeric" oninput="loginVerify()" onkeydown="otpBack(this,event,'lo5')">
+          </div>
+          <button class="btn-main" onclick="loginVerify()">دخول</button>
+          <div class="resend-row">لم يصلك الرمز؟ <span class="resend-btn" id="l-resend" onclick="loginSendOTP()">إعادة الإرسال</span><span id="l-timer"></span></div>
+          <button class="btn-ghost" onclick="document.getElementById('login-step1').style.display='block';document.getElementById('login-step2').style.display='none'">تغيير الرقم</button>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="reg-form" style="display:none">
+        <div class="step-title">إنشاء حساب فني</div>
+        <div class="step-sub">أكمل بياناتك للمراجعة والتفعيل</div>
+      <div style="background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gold);text-align:center;margin-bottom:10px">🔧 وضع تجريبي — المستندات اختيارية، الكود: <b>123456</b></div>
+
+        <!-- صورة الوجه -->
+        <div class="photo-upload">
+          <div class="photo-circle" onclick="triggerFile('face-file')" id="face-preview">📷</div>
+          <div class="photo-lbl">صورة شخصية</div>
+          <input type="file" id="face-file" accept="image/*" capture="user" style="display:none" onchange="previewPhoto(this,'face-preview')">
+        </div>
+
+        <div class="frow">
+          <div class="fr"><label class="fl">الاسم الكامل</label><input class="fi" id="r-name" placeholder="الاسم الثلاثي"></div>
+          <div class="fr"><label class="fl">رقم الجوال</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div id="t-dial-reg" style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font-weight:700;white-space:nowrap;font-size:13px">🇮🇶 +964</div>
+              <input class="fi" id="r-phone" type="tel" placeholder="07xxxxxxxx" maxlength="11" inputmode="numeric" style="flex:1">
+            </div></div>
+        </div>
+
+        <div class="fr"><label class="fl">نوع الخدمة</label>
+          <select class="fs" id="r-service">
+            <option value="">— اختر تخصصك —</option>
+            <option value="electric">⚡ كهرباء</option>
+            <option value="plumb">🔧 سباكة</option>
+            <option value="ac">❄️ تكييف</option>
+            <option value="paint">🎨 دهانات</option>
+            <option value="carp">🪚 نجارة</option>
+            <option value="clean">🧹 تنظيف</option>
+            <option value="tile">🏠 بلاط</option>
+            <option value="other">🛠️ متعدد</option>
+          </select>
+        </div>
+
+        <div class="fr"><label class="fl">المدينة</label><input class="fi" id="r-city" placeholder="الرياض، جدة..."></div>
+
+        <!-- المستندات -->
+        <div class="section-title" style="margin-top:6px">المستندات المطلوبة</div>
+
+        <div class="file-upload" onclick="triggerFile('id-front')" id="id-front-box">
+          <div class="file-upload-ic">🪪</div>
+          <div class="file-upload-info"><div class="file-upload-lbl">وجه بطاقة الهوية</div><div class="file-upload-sub">اضغط لرفع الصورة</div></div>
+          <span id="id-front-check">📎</span>
+          <input type="file" id="id-front" accept="image/*" style="display:none" onchange="markFile(this,'id-front-box','id-front-check')">
+        </div>
+
+        <div class="file-upload" onclick="triggerFile('id-back')" id="id-back-box">
+          <div class="file-upload-ic">🪪</div>
+          <div class="file-upload-info"><div class="file-upload-lbl">ظهر بطاقة الهوية</div><div class="file-upload-sub">اضغط لرفع الصورة</div></div>
+          <span id="id-back-check">📎</span>
+          <input type="file" id="id-back" accept="image/*" style="display:none" onchange="markFile(this,'id-back-box','id-back-check')">
+        </div>
+
+        <div class="file-upload" onclick="triggerFile('residence')" id="residence-box">
+          <div class="file-upload-ic">🏠</div>
+          <div class="file-upload-info"><div class="file-upload-lbl">بطاقة السكن / الإقامة</div><div class="file-upload-sub">اضغط لرفع الصورة</div></div>
+          <span id="residence-check">📎</span>
+          <input type="file" id="residence" accept="image/*" style="display:none" onchange="markFile(this,'residence-box','residence-check')">
+        </div>
+
+        <button class="btn-main" id="reg-btn" onclick="submitRegistration()">إرسال طلب التسجيل</button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">سيتم مراجعة بياناتك وتفعيل حسابك خلال 24 ساعة</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div class="screen" id="pending">
+  <div class="pending-ic">⏳</div>
+  <div class="pending-title">طلبك قيد المراجعة</div>
+  <div class="pending-sub">شكراً لتسجيلك في TechLink!<br>يتم مراجعة بياناتك ومستنداتك.<br>ستصلك رسالة عند تفعيل حسابك.</div>
+  <div class="pending-status">🕐 قيد المراجعة</div>
+  <button class="btn-ghost" style="max-width:240px;margin-top:20px" onclick="checkActivation()">🔄 تحقق من حالة حسابي</button>
+  <button class="btn-ghost" style="max-width:240px;margin-top:8px;color:var(--red)" onclick="window._fbLogout?.()">تسجيل الخروج</button>
+</div>
+
+<!-- BLOCKED -->
+<div class="screen" id="blocked">
+  <div class="pending-ic">🔒</div>
+  <div class="pending-title">حسابك موقوف</div>
+  <div class="pending-sub">تم رفض حسابك أو تعطيله من قِبل الإدارة.<br><br>تواصل مع الإدارة لمزيد من المعلومات.</div>
+  <button class="btn-ghost" style="max-width:240px;margin-top:20px" onclick="window._fbLogout?.()">تسجيل الخروج</button>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="app">
+  <div class="topbar">
+    <div class="topbar-l">
+      <div class="topbar-av" id="app-av">⚙️</div>
+      <div>
+        <div class="topbar-name" id="app-name">فني TechLink</div>
+        <div class="topbar-spec" id="app-spec">—</div>
+      </div>
+    </div>
+    <div class="topbar-r">
+      <div class="online-toggle" id="online-toggle" onclick="toggleOnline()">
+        <div class="online-dot" id="online-dot"></div>
+        <span id="online-txt">غير متاح</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content" id="main-content">
+
+    <!-- HOME PAGE -->
+    <div class="page on" id="pg-home">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val g" id="st-earnings">0</div><div class="stat-lbl">إجمالي الأرباح (ريال)</div></div>
+        <div class="stat-card"><div class="stat-val b" id="st-orders">0</div><div class="stat-lbl">الطلبات المكتملة</div></div>
+        <div class="stat-card"><div class="stat-val gr" id="st-wallet">0</div><div class="stat-lbl">رصيد المحفظة</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-rating" style="color:var(--gold)">5.0 ⭐</div><div class="stat-lbl">التقييم</div></div>
+      </div>
+
+      <!-- WALLET WARNING -->
+      <div class="w-warn" id="wallet-warn">⚠️ رصيد المحفظة منخفض — لن تستقبل طلبات جديدة</div>
+
+      <div class="section-title">الطلبات الواردة</div>
+      <div id="incoming-orders"><div class="empty"><div class="empty-ic">📭</div><div style="font-size:13px">لا توجد طلبات جديدة</div></div></div>
+
+      <div class="section-title" style="margin-top:16px">طلباتي الحالية</div>
+      <div id="active-orders"><div class="empty"><div class="empty-ic">🔧</div><div style="font-size:13px">لا توجد طلبات نشطة</div></div></div>
+    </div>
+
+    <!-- HISTORY PAGE -->
+    <div class="page" id="pg-history">
+      <div class="section-title">سجل الطلبات</div>
+      <div id="history-list"><div class="empty"><div class="empty-ic">📋</div><div style="font-size:13px">لا توجد طلبات مكتملة</div></div></div>
+    </div>
+
+    <!-- MAP / NAV PAGE -->
+    <div class="page" id="pg-map">
+      <div class="section-title">الملاحة للزبون</div>
+      <div id="nav-map"></div>
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px" id="nav-info">
+        <div style="color:var(--muted);font-size:13px">اقبل طلباً لبدء الملاحة</div>
+      </div>
+    </div>
+
+    <!-- WALLET PAGE -->
+    <div class="page" id="pg-wallet">
+      <div class="w-hero">
+        <div class="w-lbl">رصيد المحفظة</div>
+        <div class="w-bal" id="w-display">0.00 <span style="font-size:18px;color:var(--muted)">ريال</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">تُستقطع 10% عمولة من كل طلب</div>
+      </div>
+      <div class="w-warn" id="w-warn2" style="display:block">⚠️ لاستقبال الطلبات يجب أن يكون رصيدك 50 ريال على الأقل</div>
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div class="section-title">سجل المعاملات</div>
+        <div id="w-txns"><div class="empty" style="padding:16px"><div class="empty-ic" style="font-size:28px">💳</div><div style="font-size:12px">لا توجد معاملات</div></div></div>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="pg-profile">
+      <div style="text-align:center;padding:20px 16px 12px">
+        <div class="profile-av-lg" id="profile-av-lg">🔧</div>
+        <div style="font-size:19px;font-weight:700" id="profile-name-lg">—</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px" id="profile-spec-lg">—</div>
+        <div class="rating-row"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span style="font-size:13px;color:var(--muted);margin-right:4px" id="profile-rating">5.0</span></div>
+      </div>
+      <div class="profile-sec">
+        <div class="pi"><div class="pi-l"><div class="pi-ic">📱</div><div><div class="pi-lbl">رقم الجوال</div><div class="pi-sub" id="prof-phone">—</div></div></div></div>
+        <div class="pi"><div class="pi-l"><div class="pi-ic">🔧</div><div><div class="pi-lbl">التخصص</div><div class="pi-sub" id="prof-spec">—</div></div></div></div>
+        <div class="pi"><div class="pi-l"><div class="pi-ic">📍</div><div><div class="pi-lbl">المدينة</div><div class="pi-sub" id="prof-city">—</div></div></div></div>
+        <div class="pi"><div class="pi-l"><div class="pi-ic">✅</div><div><div class="pi-lbl">حالة الحساب</div><div class="pi-sub" id="prof-status">—</div></div></div></div>
+      </div>
+      <div class="profile-sec">
+        <div class="pi" onclick="doLogout()" style="cursor:pointer">
+          <div class="pi-l"><div class="pi-ic">🚪</div><div><div class="pi-lbl" style="color:var(--red)">تسجيل الخروج</div></div></div>
+          <span style="color:var(--muted)">›</span>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:11px;padding:8px">TechLink Tech v1.0</div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <div class="bn on" id="bn-home" onclick="goPage('home')"><span class="bn-ic">🏠</span>الرئيسية</div>
+    <div class="bn" id="bn-history" onclick="goPage('history')"><span class="bn-ic">📋</span>السجل</div>
+    <div class="bn" id="bn-map" onclick="goPage('map')"><span class="bn-ic">🗺️</span>الملاحة</div>
+    <div class="bn" id="bn-wallet" onclick="goPage('wallet')"><span class="bn-ic">💰</span>المحفظة</div>
+    <div class="bn" id="bn-profile" onclick="goPage('profile')"><span class="bn-ic">👤</span>حسابي</div>
+  </div>
+</div>
+
+<!-- CHAT MODAL -->
+<div class="modal-bg" id="chat-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="chat-title">💬 محادثة</div>
+    <div class="chat-wrap" style="height:320px">
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-bar">
+        <input class="chat-fi" id="chat-input" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="recaptcha-box"></div>
+<div id="toasts"></div>
+
+<script>
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let currentUser = null;
+let techData    = null;
+let isOnline    = false;
+let activeOrderId = null;
+let navMap = null, navRoute = null;
+let confirmResult = null;
+let resendTimer   = null;
+let currentChat   = null;
+let chatUnsub     = null;
+let ordersUnsub   = null;
+
+// TECH COUNTRY
+const T_COUNTRIES = {
+  IQ:{dial:'+964',flag:'🇮🇶',maxLen:11,stripZero:true, placeholder:'07xxxxxxxxx'},
+  SA:{dial:'+966',flag:'🇸🇦',maxLen:9, stripZero:false,placeholder:'5xxxxxxxx'},
+  AE:{dial:'+971',flag:'🇦🇪',maxLen:9, stripZero:false,placeholder:'5xxxxxxxx'},
+  KW:{dial:'+965',flag:'🇰🇼',maxLen:8, stripZero:false,placeholder:'xxxxxxxx'},
+  BH:{dial:'+973',flag:'🇧🇭',maxLen:8, stripZero:false,placeholder:'xxxxxxxx'},
+  QA:{dial:'+974',flag:'🇶🇦',maxLen:8, stripZero:false,placeholder:'xxxxxxxx'},
+  OM:{dial:'+968',flag:'🇴🇲',maxLen:8, stripZero:false,placeholder:'xxxxxxxx'},
+  JO:{dial:'+962',flag:'🇯🇴',maxLen:9, stripZero:true, placeholder:'07xxxxxxx'},
+  EG:{dial:'+20', flag:'🇪🇬',maxLen:11,stripZero:true, placeholder:'01xxxxxxxxx'},
+};
+let techCountry = T_COUNTRIES['IQ'];
+
+function buildTechPhone(num){
+  if(techCountry.stripZero && num.startsWith('0')) return techCountry.dial + num.slice(1);
+  return techCountry.dial + num;
+}
+
+function onTechCountryChange(){
+  const code = document.getElementById('t-country-select')?.value || 'IQ';
+  techCountry = T_COUNTRIES[code] || T_COUNTRIES['IQ'];
+  const dd = document.getElementById('t-dial-display');
+  const dr = document.getElementById('t-dial-reg');
+  const lbl = techCountry.flag+' '+techCountry.dial;
+  if(dd) dd.textContent = lbl;
+  if(dr) dr.textContent = lbl;
+  const lp = document.getElementById('l-phone');
+  if(lp){ lp.maxLength=techCountry.maxLen; lp.placeholder=techCountry.placeholder; lp.value=''; }
+  const rp = document.getElementById('r-phone');
+  if(rp){ rp.maxLength=techCountry.maxLen; rp.placeholder=techCountry.placeholder; rp.value=''; }
+}
+
+// ── وضع تجريبي ──
+// غيّر DEMO_MODE إلى false عند الإطلاق الحقيقي
+const DEMO_MODE = true;
+const DEMO_CODE = String('123456');
+let demoTechPhone = '';
+
+const serviceLabels = {
+  electric:'⚡ كهرباء', plumb:'🔧 سباكة', ac:'❄️ تكييف',
+  paint:'🎨 دهانات', carp:'🪚 نجارة', clean:'🧹 تنظيف',
+  tile:'🏠 بلاط', other:'🛠️ متعدد'
+};
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+window.addEventListener('load', () => {
+  onTechCountryChange();
+  setTimeout(() => {
+    if(!DEMO_MODE && window._authState){
+      window._authState(async user => {
+        if(user){ currentUser=user; await loadTechData(); }
+        else { showScreen('auth'); }
+      });
+    } else {
+      showScreen('auth');
+    }
+  }, 1800);
+});
+
+// ══════════════════════════════
+// SCREENS
+// ══════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════
+// LOAD TECH DATA
+// ══════════════════════════════
+async function loadTechData(){
+  // في الوضع التجريبي اقرأ من localStorage
+  if(DEMO_MODE){
+    // حاول أولاً بالـ uid
+    techData = JSON.parse(localStorage.getItem('tl_tech_'+currentUser.uid)||'null');
+    // إذا لم يجد، ابحث برقم الجوال
+    if(!techData && currentUser.phoneNumber){
+      for(let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        if(key && key.startsWith('tl_tech_')){
+          try {
+            const d = JSON.parse(localStorage.getItem(key));
+            if(d && d.phone === currentUser.phoneNumber){
+              techData = d;
+              break;
+            }
+          } catch(e){}
+        }
+      }
+    }
+    if(!techData){ showScreen('auth'); authTab('reg'); return; }
+    if(techData.status==='pending'){ showScreen('pending'); return; }
+    if(techData.status==='rejected'||techData.status==='blocked'){ showScreen('blocked'); return; }
+    // حساب مفعّل — ادخل بغض النظر عن الرصيد (تحذير داخلي فقط)
+    launchApp(); return;
+  }
+  if(!window._fbReady){ showScreen('auth'); return; }
+  try {
+    const snap = await window._getDoc('techs', currentUser.uid);
+    if(!snap.exists()){
+      // بيانات من localStorage
+      const local = localStorage.getItem('tl_tech_' + currentUser.uid);
+      if(local){
+        techData = JSON.parse(local);
+        if(techData.status === 'pending'){ showScreen('pending'); return; }
+        if(techData.status !== 'active'){ showScreen('blocked'); return; }
+        launchApp();
+      } else {
+        showScreen('auth');
+      }
+      return;
+    }
+    techData = snap.data();
+    localStorage.setItem('tl_tech_' + currentUser.uid, JSON.stringify(techData));
+    if(techData.status === 'pending'){ showScreen('pending'); return; }
+    if(techData.status === 'rejected' || techData.status === 'blocked'){ showScreen('blocked'); return; }
+    launchApp();
+  } catch(e) {
+    console.error(e);
+    showScreen('auth');
+  }
+}
+
+async function launchApp(){
+  showScreen('app');
+  // دائماً اجلب أحدث بيانات من Firebase قبل العرض
+  if(window._fbReady && techData && techData.uid){
+    try {
+      const snap = await window._getDoc('techs', techData.uid);
+      if(snap.exists()){
+        const fresh = snap.data();
+        techData = {...techData, ...fresh};
+        localStorage.setItem('tl_tech_'+techData.uid, JSON.stringify(techData));
+      }
+    } catch(e){ console.warn('Could not refresh tech data', e); }
+  }
+  renderProfile();
+  renderWallet();
+  renderStats();
+  listenOrders();
+  setTimeout(initNavMap, 300);
+  // استمع لتغييرات بيانات الفني في Firebase (رصيد، حالة...)
+  listenTechData();
+}
+
+function listenTechData(){
+  if(!window._fbReady || !techData?.uid) return;
+  // مراقبة مستمرة لبيانات الفني
+  const ref = window._doc('techs', techData.uid);
+  window._onSnap(ref, snap => {
+    if(snap.exists()){
+      const fresh = snap.data();
+      techData = {...techData, ...fresh};
+      localStorage.setItem('tl_tech_'+techData.uid, JSON.stringify(techData));
+      renderWallet();
+      renderStats();
+      renderProfile();
+    }
+  });
+}
+
+// ══════════════════════════════
+// AUTH TABS
+// ══════════════════════════════
+function authTab(tab){
+  document.getElementById('atab-login').classList.toggle('on', tab==='login');
+  document.getElementById('atab-reg').classList.toggle('on', tab==='reg');
+  document.getElementById('login-form').style.display = tab==='login'?'block':'none';
+  document.getElementById('reg-form').style.display   = tab==='reg'?'block':'none';
+  document.getElementById('auth-err').style.display   = 'none';
+}
+
+// ══════════════════════════════
+// LOGIN
+// ══════════════════════════════
+async function loginSendOTP(){
+  const phone = document.getElementById('l-phone').value.trim();
+  if(!phone || phone.length < techCountry.maxLen){
+    authErr('أدخل رقم الجوال كاملاً ('+techCountry.maxLen+' أرقام)'); return;
+  }
+  const fullPhone = buildTechPhone(phone);
+  demoTechPhone = fullPhone;
+  setBtn('l-send-btn', true, 'جاري الإرسال...');
+  hideErr();
+
+  if(DEMO_MODE){
+    demoTechPhone = fullPhone; // حفظ الرقم للتحقق لاحقاً
+    setTimeout(()=>{
+      document.getElementById('login-step1').style.display = 'none';
+      document.getElementById('login-step2').style.display = 'block';
+      document.getElementById('l-otp-sub').textContent = '🔧 وضع تجريبي — الكود: 123456';
+      document.getElementById('lo1').focus();
+      startTimer('l-resend','l-timer',60);
+      setBtn('l-send-btn',false,'إرسال رمز التحقق');
+      toast('🔧 الكود التجريبي: 123456','ok');
+    },300);
+    return;
+  }
+
+  try {
+    confirmResult = await window._sendOTP(fullPhone);
+    document.getElementById('login-step1').style.display = 'none';
+    document.getElementById('login-step2').style.display = 'block';
+    document.getElementById('l-otp-sub').textContent = 'أُرسل رمز إلى ' + fullPhone;
+    document.getElementById('lo1').focus();
+    startTimer('l-resend','l-timer',60);
+    toast('✅ تم إرسال الرمز','ok');
+  } catch(e) {
+    setBtn('l-send-btn',false,'إرسال رمز التحقق');
+    authErr(otpErrMsg(e.code));
+  }
+}
+
+async function loginVerify(){
+  const code = ['lo1','lo2','lo3','lo4','lo5','lo6'].map(id => document.getElementById(id).value).join('');
+  if(code.length < 6) return;
+  hideErr();
+
+  if(DEMO_MODE){
+    if(code === DEMO_CODE){
+      // البحث عن بيانات الفني برقم الجوال في localStorage
+      const phone = demoTechPhone;
+      let foundData = null;
+      // ابحث في كل مفاتيح localStorage عن الفني برقم الجوال
+      for(let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        if(key && key.startsWith('tl_tech_')){
+          try {
+            const d = JSON.parse(localStorage.getItem(key));
+            if(d && d.phone === phone){
+              foundData = d;
+              currentUser = { uid: d.uid, phoneNumber: phone };
+              break;
+            }
+          } catch(e){}
+        }
+      }
+      if(!foundData){
+        // لم يجد — سجّل حساباً جديداً
+        showScreen('auth');
+        authTab('reg');
+        toast('👋 مرحباً! سجّل بياناتك كفني أولاً','ok');
+      } else {
+        currentUser = { uid: foundData.uid, phoneNumber: phone };
+        techData = foundData;
+        if(techData.status==='pending'){
+          showScreen('pending');
+        } else if(techData.status==='rejected'||techData.status==='blocked'){
+          showScreen('blocked');
+        } else {
+          // مفعّل — ادخل مباشرة
+          launchApp();
+        }
+      }
+    } else {
+      authErr('الكود غير صحيح — استخدم 123456');
+      ['lo1','lo2','lo3','lo4','lo5','lo6'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('lo1').focus();
+    }
+    return;
+  }
+
+  try {
+    let regUser;
+    if(DEMO_MODE){
+      if(code!==DEMO_CODE){ authErr('الكود غير صحيح — استخدم 123456'); return; }
+      regUser = { uid:'demo_tech_'+demoTechPhone.replace(/[^0-9]/g,''), phoneNumber:demoTechPhone };
+    } else {
+      const res = await confirmResult.confirm(code);
+      regUser = res.user;
+    }
+    currentUser = regUser;
+    await loadTechData();
+  } catch(e) {
+    authErr('رمز التحقق غير صحيح أو منتهي الصلاحية');
+    ['lo1','lo2','lo3','lo4','lo5','lo6'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('lo1').focus();
+  }
+}
+
+// ══════════════════════════════
+// REGISTER
+// ══════════════════════════════
+async function submitRegistration(){
+  const name    = document.getElementById('r-name').value.trim();
+  const phone   = document.getElementById('r-phone').value.trim();
+  const service = document.getElementById('r-service').value;
+  const city    = document.getElementById('r-city').value.trim();
+  const faceFile= document.getElementById('face-file').files[0];
+  const idFront = document.getElementById('id-front').files[0];
+  const idBack  = document.getElementById('id-back').files[0];
+  const resFile = document.getElementById('residence').files[0];
+
+  if(!name||!phone||!service||!city){ authErr('أكمل جميع الحقول المطلوبة'); return; }
+  if(!service){ authErr('اختر نوع الخدمة'); return; }
+
+  // المستندات مطلوبة فقط في وضع الإنتاج
+  if(!DEMO_MODE){
+    if(!faceFile){ authErr('أرفق صورتك الشخصية'); return; }
+    if(!idFront||!idBack){ authErr('أرفق صورتي بطاقة الهوية'); return; }
+    if(!resFile){ authErr('أرفق بطاقة السكن'); return; }
+  }
+
+  setBtn('reg-btn', true, 'جاري الإرسال...');
+  hideErr();
+
+  // حفظ البيانات مؤقتاً
+  window._regData = { name, phone, service, city, faceFile, idFront, idBack, resFile };
+
+  if(DEMO_MODE){
+    // وضع تجريبي — لا SMS، فقط أظهر OTP مباشرة
+    showRegOTPStep();
+    setBtn('reg-btn', false, 'إرسال طلب التسجيل');
+    toast('🔧 أدخل الكود التجريبي: 123456', 'ok');
+    return;
+  }
+
+  try {
+    const fullRegPhone = buildTechPhone(phone);
+    confirmResult = await window._sendOTP(fullRegPhone);
+    showRegOTPStep();
+  } catch(e) {
+    setBtn('reg-btn', false, 'إرسال طلب التسجيل');
+    authErr(otpErrMsg(e.code));
+  }
+}
+
+function showRegOTPStep(){
+  document.getElementById('reg-form').innerHTML += `
+    <div id="reg-otp-step" style="margin-top:14px">
+      <div class="step-sub">أدخل رمز التحقق المرسل لرقمك</div>
+      <div class="otp-row">
+        <input class="otp-box" id="ro1" maxlength="1" inputmode="numeric" oninput="otpNext(this,'ro2')">
+        <input class="otp-box" id="ro2" maxlength="1" inputmode="numeric" oninput="otpNext(this,'ro3')" onkeydown="otpBack(this,event,'ro1')">
+        <input class="otp-box" id="ro3" maxlength="1" inputmode="numeric" oninput="otpNext(this,'ro4')" onkeydown="otpBack(this,event,'ro2')">
+        <input class="otp-box" id="ro4" maxlength="1" inputmode="numeric" oninput="otpNext(this,'ro5')" onkeydown="otpBack(this,event,'ro3')">
+        <input class="otp-box" id="ro5" maxlength="1" inputmode="numeric" oninput="otpNext(this,'ro6')" onkeydown="otpBack(this,event,'ro4')">
+        <input class="otp-box" id="ro6" maxlength="1" inputmode="numeric" oninput="finalizeReg()" onkeydown="otpBack(this,event,'ro5')">
+      </div>
+      <button class="btn-main" onclick="finalizeReg()">تأكيد وإرسال</button>
+    </div>`;
+  document.getElementById('reg-btn').style.display = 'none';
+  document.getElementById('ro1').focus();
+}
+
+async function finalizeReg(){
+  const boxes = ['ro1','ro2','ro3','ro4','ro5','ro6'];
+  const code = boxes.map(id => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }).join('');
+
+  if(code.length < 6) return;
+
+  const d = window._regData;
+  if(!d){ authErr('بيانات التسجيل مفقودة — أعد المحاولة'); return; }
+
+  // ── وضع تجريبي ──
+  if(DEMO_MODE){
+    if(code !== '123456'){
+      authErr('رمز التحقق غير صحيح — الرمز هو: 123456');
+      boxes.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('ro1')?.focus();
+      return;
+    }
+    const uid = 'demo_' + Date.now();
+    const phone = buildTechPhone(d.phone);
+    currentUser = { uid, phoneNumber: phone };
+    const techDoc = {
+      uid, name: d.name, phone: phone,
+      service: d.service, city: d.city,
+      faceUrl:'', idFUrl:'', idBUrl:'', resUrl:'',
+      wallet: 0, rating: 5.0, ordersCount: 0,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    techData = techDoc;
+    localStorage.setItem('tl_tech_' + uid, JSON.stringify(techDoc));
+    try { if(window._fbReady) await window._setDoc('techs', uid, techDoc); } catch(e){}
+    showScreen('pending');
+    toast('✅ تم إرسال طلب التسجيل! انتظر موافقة المدير', 'ok');
+    return;
+  }
+
+  // ── وضع إنتاج ──
+  try {
+    const res = await confirmResult.confirm(code);
+    currentUser = res.user;
+    const uid = currentUser.uid;
+    toast('📤 جاري رفع المستندات...', '');
+    let faceUrl='', idFUrl='', idBUrl='', resUrl='';
+    try {
+      if(d.faceFile) faceUrl = await window._uploadFile('techs/'+uid+'/face.jpg', d.faceFile);
+      if(d.idFront)  idFUrl  = await window._uploadFile('techs/'+uid+'/id_front.jpg', d.idFront);
+      if(d.idBack)   idBUrl  = await window._uploadFile('techs/'+uid+'/id_back.jpg', d.idBack);
+      if(d.resFile)  resUrl  = await window._uploadFile('techs/'+uid+'/residence.jpg', d.resFile);
+    } catch(e){ console.warn('Upload err', e); }
+    const techDoc = {
+      uid, name:d.name, phone: buildTechPhone(d.phone),
+      service:d.service, city:d.city,
+      faceUrl, idFUrl, idBUrl, resUrl,
+      wallet:0, rating:5.0, ordersCount:0,
+      status:'pending', createdAt:new Date().toISOString()
+    };
+    await window._setDoc('techs', uid, techDoc);
+    techData = techDoc;
+    localStorage.setItem('tl_tech_' + uid, JSON.stringify(techDoc));
+    showScreen('pending');
+    toast('✅ تم إرسال طلب التسجيل بنجاح!', 'ok');
+  } catch(e) {
+    authErr('رمز التحقق غير صحيح أو منتهي');
+  }
+}
+
+// ══════════════════════════════
+// ONLINE TOGGLE
+// ══════════════════════════════
+function toggleOnline(){
+  if((techData.wallet||0) < 50){ toast('⚠️ تنبيه: رصيد المحفظة منخفض — قد لا تستقبل طلبات', ''); }
+  isOnline = !isOnline;
+  document.getElementById('online-dot').classList.toggle('on', isOnline);
+  document.getElementById('online-txt').textContent = isOnline ? 'متاح' : 'غير متاح';
+  if(window._fbReady) window._setDoc('techs', currentUser.uid, {online:isOnline});
+  toast(isOnline ? '🟢 أنت متاح الآن لاستقبال الطلبات' : '🔴 أنت غير متاح', isOnline?'ok':'');
+}
+
+// ══════════════════════════════
+// LISTEN ORDERS
+// ══════════════════════════════
+function listenOrders(){
+  if(!window._fbReady || !techData) return;
+  if(ordersUnsub) ordersUnsub();
+
+  // استمع لجميع الطلبات المعلقة وصفّها محلياً حسب التخصص
+  const q = window._query(
+    window._col('orders'),
+    window._where('status','==','pending'),
+    window._orderBy('ts','desc')
+  );
+  ordersUnsub = window._onSnap(q, snap => {
+    const allPending = snap.docs.map(d => ({docId:d.id, ...d.data()}));
+    // فلترة حسب تخصص الفني
+    const myService = techData.service;
+    const matching = allPending.filter(o =>
+      o.service === myService ||
+      o.serviceLabel === (SVC[myService]||myService) ||
+      !o.service // طلبات بدون خدمة محددة
+    );
+    renderIncoming(matching);
+    // رنين إذا وجد طلبات جديدة
+    if(matching.length > 0) playNotifSound();
+  });
+
+  // طلباتي الحالية
+  const q2 = window._query(
+    window._col('orders'),
+    window._where('techId','==',currentUser.uid),
+    window._where('status','in',['inprogress','accepted'])
+  );
+  window._onSnap(q2, snap => {
+    const active = snap.docs.map(d => ({docId:d.id, ...d.data()}));
+    renderActive(active);
+  });
+
+  // السجل
+  const q3 = window._query(
+    window._col('orders'),
+    window._where('techId','==',currentUser.uid),
+    window._orderBy('ts','desc')
+  );
+  window._onSnap(q3, snap => {
+    const all = snap.docs.map(d => ({docId:d.id, ...d.data()}));
+    renderHistory(all);
+    renderStats(all);
+  });
+}
+
+// ══════════════════════════════
+// RENDER ORDERS
+// ══════════════════════════════
+function renderIncoming(orders){
+  const el = document.getElementById('incoming-orders');
+  if(!isOnline){ el.innerHTML = '<div class="empty"><div class="empty-ic">🔴</div><div style="font-size:13px">فعّل "متاح" لاستقبال الطلبات</div></div>'; return; }
+  if(!orders.length){ el.innerHTML = '<div class="empty"><div class="empty-ic">📭</div><div style="font-size:13px">لا توجد طلبات جديدة</div></div>'; return; }
+
+  // رنين عند وجود طلبات
+  playNotifSound();
+
+  el.innerHTML = orders.map(o => `
+    <div class="order-card new-order">
+      <div class="oc-top">
+        <div class="oc-service">
+          <div class="oc-service-ic">${getServiceIcon(o.service)}</div>
+          <div><div class="oc-service-name">${o.serviceLabel||serviceLabels[o.service]||o.service}</div>
+          <div class="oc-service-sub">${o.desc||'—'}</div></div>
+        </div>
+        <span class="oc-id">${o.id||o.docId}</span>
+      </div>
+      <div class="oc-info">
+        <div class="oci"><div class="oci-lbl">الدفع</div><div class="oci-val">${o.pay==='cash'?'💵 نقد':'💳 محفظة'}</div></div>
+        <div class="oci"><div class="oci-lbl">الموعد</div><div class="oci-val" style="font-size:12px">${o.datetime?.slice(0,16)||'—'}</div></div>
+      </div>
+      <div class="oc-actions">
+        <button class="oc-btn oc-btn-accept" onclick="acceptOrder('${o.docId}','${o.custPhone||''}',${o.lat||0},${o.lng||0})">✅ قبول</button>
+        <button class="oc-btn oc-btn-reject" onclick="rejectOrder('${o.docId}')">✕ رفض</button>
+        ${o.custPhone?`<a class="oc-btn oc-btn-call" href="tel:${o.custPhone}">📞</a>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderActive(orders){
+  const el = document.getElementById('active-orders');
+  if(!orders.length){ el.innerHTML = '<div class="empty"><div class="empty-ic">🔧</div><div style="font-size:13px">لا توجد طلبات نشطة</div></div>'; return; }
+  el.innerHTML = orders.map(o => `
+    <div class="order-card">
+      <div class="oc-top">
+        <div class="oc-service">
+          <div class="oc-service-ic">${getServiceIcon(o.service)}</div>
+          <div><div class="oc-service-name">${o.serviceLabel||serviceLabels[o.service]||o.service}</div>
+          <div class="oc-service-sub">${o.custPhone||'—'}</div></div>
+        </div>
+        <span class="tag t-prog"><span class="dot"></span>جارٍ</span>
+      </div>
+      <div class="oc-actions">
+        ${o.lat?`<button class="oc-btn oc-btn-nav" onclick="startNav(${o.lat},${o.lng})">🗺️ ملاحة</button>`:''}
+        <button class="oc-btn oc-btn-done" onclick="completeOrder('${o.docId}',${o.amount||0})">✅ إتمام</button>
+        ${o.custPhone?`<a class="oc-btn oc-btn-call" href="tel:${o.custPhone}">📞</a>`:''}
+        <button class="oc-btn oc-btn-msg" onclick="openChat('${o.docId}','${o.custPhone||''}')">💬</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderHistory(orders){
+  const el = document.getElementById('history-list');
+  const done = orders.filter(o => o.status==='done'||o.status==='cancelled');
+  if(!done.length){ el.innerHTML = '<div class="empty"><div class="empty-ic">📋</div><div style="font-size:13px">لا يوجد سجل</div></div>'; return; }
+  const stTag = s => {
+    const m={done:'t-done',cancelled:'t-cancel'};
+    const l={done:'مكتمل',cancelled:'ملغي'};
+    return `<span class="tag ${m[s]||''}">${l[s]||s}</span>`;
+  };
+  el.innerHTML = done.map(o => `
+    <div class="order-card">
+      <div class="oc-top">
+        <div class="oc-service">
+          <div class="oc-service-ic">${getServiceIcon(o.service)}</div>
+          <div><div class="oc-service-name">${o.serviceLabel||serviceLabels[o.service]||o.service}</div>
+          <div class="oc-service-sub">${o.dateStr||o.datetime?.slice(0,10)||'—'}</div></div>
+        </div>
+        ${stTag(o.status)}
+      </div>
+      <div class="oc-info">
+        <div class="oci"><div class="oci-lbl">المبلغ</div><div class="oci-val" style="color:var(--green)">${o.amount||'—'} ريال</div></div>
+        <div class="oci"><div class="oci-lbl">العمولة (10%)</div><div class="oci-val" style="color:var(--red)">-${o.commission||'—'} ريال</div></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderStats(orders){
+  const done = (orders||[]).filter(o => o.status==='done');
+  document.getElementById('st-earnings').textContent = done.reduce((s,o)=>s+(o.amount||0),0).toFixed(0);
+  document.getElementById('st-orders').textContent   = done.length;
+  document.getElementById('st-wallet').textContent   = (techData?.wallet||0).toFixed(0);
+  document.getElementById('st-rating').textContent   = (techData?.rating||5.0).toFixed(1) + ' ⭐';
+  document.getElementById('w-display').innerHTML     = (techData?.wallet||0).toFixed(2)+' <span style="font-size:18px;color:var(--muted)">ريال</span>';
+
+  const lowWallet = (techData?.wallet||0) < 50;
+  document.getElementById('wallet-warn').style.display = lowWallet ? 'block' : 'none';
+  document.getElementById('w-warn2').style.display     = lowWallet ? 'block' : 'none';
+}
+
+// ══════════════════════════════
+// ACCEPT / REJECT / COMPLETE
+// ══════════════════════════════
+async function acceptOrder(docId, custPhone, lat, lng){
+  if(!isOnline){ toast('فعّل وضع "متاح" أولاً', 'err'); return; }
+  if((techData?.wallet||0) < 50){ toast('رصيد المحفظة غير كافٍ', 'err'); return; }
+  try {
+    await window._updateDoc('orders', docId, {
+      status:'inprogress', techId:currentUser.uid,
+      techName:techData.name, techPhone:techData.phone
+    });
+    activeOrderId = docId;
+    if(lat && lng) startNav(lat, lng);
+    toast('✅ تم قبول الطلب — ابدأ التنقل للزبون', 'ok');
+    goPage('map');
+  } catch(e) { toast('تعذر قبول الطلب', 'err'); }
+}
+
+async function rejectOrder(docId){
+  toast('تم رفض الطلب', '');
+}
+
+async function completeOrder(docId, amount){
+  const commission = +(( amount||0) * 0.1).toFixed(2);
+  try {
+    // 1. تحديث حالة الطلب
+    await window._updateDoc('orders', docId, {
+      status: 'done',
+      commission: commission,
+      completedAt: new Date().toISOString()
+    });
+
+    // 2. استقطاع العمولة تلقائياً من محفظة الفني
+    const currentWallet = techData.wallet || 0;
+    const newWallet = +(currentWallet - commission).toFixed(2);
+    techData.wallet = newWallet;
+    techData.ordersCount = (techData.ordersCount||0) + 1;
+    if(!techData.txns) techData.txns = [];
+    techData.txns.unshift({
+      label: 'عمولة تلقائية — طلب ' + docId,
+      amount: commission,
+      dir: 'out',
+      date: new Date().toLocaleString('ar-SA')
+    });
+
+    // 3. حفظ في Firebase
+    await window._setDoc('techs', currentUser.uid, {
+      wallet: newWallet,
+      ordersCount: techData.ordersCount
+    });
+
+    // 4. حفظ محلي
+    localStorage.setItem('tl_tech_'+currentUser.uid, JSON.stringify(techData));
+
+    renderStats();
+    renderWallet();
+    if(navRoute){ try{navMap.removeControl(navRoute);}catch(e){} navRoute=null; }
+    toast('✅ تم إتمام الطلب — استُقطعت العمولة '+commission+' ريال تلقائياً', 'ok');
+  } catch(e) {
+    console.error(e);
+    toast('تعذر إتمام الطلب: '+e.message, 'err');
+  }
+}
+
+// ══════════════════════════════
+// NAVIGATION MAP
+// ══════════════════════════════
+function initNavMap(){
+  if(navMap) return;
+  navMap = L.map('nav-map').setView([24.7136, 46.6753], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(navMap);
+  setTimeout(() => navMap.invalidateSize(), 300);
+}
+
+function startNav(custLat, custLng){
+  goPage('map');
+  setTimeout(() => {
+    navMap.invalidateSize();
+    if(navRoute){ try{navMap.removeControl(navRoute);}catch(e){} }
+    if(!navigator.geolocation){ toast('GPS غير مدعوم', 'err'); return; }
+    navigator.geolocation.getCurrentPosition(p => {
+      const tLat=p.coords.latitude, tLng=p.coords.longitude;
+      navRoute = L.Routing.control({
+        waypoints:[L.latLng(tLat,tLng),L.latLng(custLat,custLng)],
+        lineOptions:{styles:[{color:'#f0a500',weight:5,opacity:.85}]},
+        addWaypoints:false,draggableWaypoints:false,fitSelectedRoutes:true,show:false,
+        router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'driving'})
+      }).on('routesfound', e => {
+        const r=e.routes[0];
+        const km=(r.summary.totalDistance/1000).toFixed(2);
+        const mins=Math.round(r.summary.totalTime/60);
+        document.getElementById('nav-info').innerHTML = `
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div style="flex:1;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--gold);font-family:var(--mono)">${km}</div><div style="font-size:11px;color:var(--muted)">كيلومتر</div></div>
+            <div style="flex:1;text-align:center"><div style="font-size:22px;font-weight:900;color:var(--green);font-family:var(--mono)">${mins}</div><div style="font-size:11px;color:var(--muted)">دقيقة</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center">🟡 أنت ← 🔵 الزبون</div>`;
+        L.marker([tLat,tLng],{icon:mkIcon('#f0a500')}).addTo(navMap).bindPopup('🟡 موقعك');
+        L.marker([custLat,custLng],{icon:mkIcon('#3b82f6')}).addTo(navMap).bindPopup('🔵 الزبون');
+      }).addTo(navMap);
+    }, e => toast('GPS: '+e.message,'err'), {enableHighAccuracy:true,timeout:10000});
+  }, 200);
+}
+
+function mkIcon(color){
+  return L.divIcon({className:'',html:`<div style="width:14px;height:14px;background:${color};border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+}
+
+// ══════════════════════════════
+// WALLET RENDER
+// ══════════════════════════════
+function renderWallet(){
+  const el = document.getElementById('w-txns');
+  const txns = techData?.txns||[];
+  if(!txns.length){ el.innerHTML = '<div class="empty" style="padding:16px"><div class="empty-ic" style="font-size:28px">💳</div><div style="font-size:12px">لا توجد معاملات</div></div>'; return; }
+  el.innerHTML = txns.slice(0,20).map(t => `
+    <div class="txn-item">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div class="txn-ic ${t.dir}">${t.dir==='in'?'📥':'📤'}</div>
+        <div><div class="txn-name">${t.label}</div><div class="txn-date">${t.date}</div></div>
+      </div>
+      <div class="txn-amt ${t.dir}">${t.dir==='in'?'+':'-'}${t.amount.toFixed(2)} ريال</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════
+// CHAT
+// ══════════════════════════════
+function openChat(orderId, custPhone){
+  currentChat = orderId;
+  document.getElementById('chat-title').textContent = '💬 محادثة مع الزبون';
+  document.getElementById('chat-msgs').innerHTML = '';
+  document.getElementById('chat-modal').classList.add('on');
+  if(chatUnsub) chatUnsub();
+  if(window._fbReady){
+    const q = window._query(window._col('messages'), window._where('orderId','==',orderId), window._orderBy('ts','asc'));
+    chatUnsub = window._onSnap(q, snap => {
+      const msgs = snap.docs.map(d => d.data());
+      const el = document.getElementById('chat-msgs');
+      el.innerHTML = msgs.map(m => `
+        <div>
+          <div class="msg ${m.sender===currentUser.uid?'msg-me':'msg-other'}">${m.text}</div>
+          <div class="msg-time" style="text-align:${m.sender===currentUser.uid?'right':'left'}">${new Date(m.ts).toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'})}</div>
+        </div>`).join('');
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+}
+
+async function sendMsg(){
+  const txt = document.getElementById('chat-input').value.trim();
+  if(!txt || !currentChat) return;
+  document.getElementById('chat-input').value = '';
+  try {
+    await window._addDoc(window._col('messages'), {
+      orderId:currentChat, sender:currentUser.uid,
+      senderName:techData.name, text:txt, ts:Date.now()
+    });
+  } catch(e) { toast('تعذر إرسال الرسالة', 'err'); }
+}
+
+// ══════════════════════════════
+// PROFILE
+// ══════════════════════════════
+function renderProfile(){
+  if(!techData) return;
+  document.getElementById('app-name').textContent  = techData.name||'فني';
+  document.getElementById('app-spec').textContent  = serviceLabels[techData.service]||techData.service||'—';
+  document.getElementById('profile-name-lg').textContent = techData.name||'—';
+  document.getElementById('profile-spec-lg').textContent = serviceLabels[techData.service]||'—';
+  document.getElementById('prof-phone').textContent = techData.phone||'—';
+  document.getElementById('prof-spec').textContent  = serviceLabels[techData.service]||'—';
+  document.getElementById('prof-city').textContent  = techData.city||'—';
+  document.getElementById('prof-status').textContent = techData.status==='active'?'✅ مفعّل':'⏳ قيد المراجعة';
+  if(techData.faceUrl){
+    document.getElementById('app-av').innerHTML = `<img src="${techData.faceUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    document.getElementById('profile-av-lg').innerHTML = `<img src="${techData.faceUrl}" style="width:100%;height:100%;object-fit:cover">`;
+  }
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+function getServiceIcon(s){return{electric:'⚡',plumb:'🔧',ac:'❄️',paint:'🎨',carp:'🪚',clean:'🧹',tile:'🏠',other:'🛠️'}[s]||'🛠️'}
+
+function playNotifSound(){
+  try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(880,a.currentTime);g.gain.setValueAtTime(.3,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.3);o.start(a.currentTime);o.stop(a.currentTime+.3);}catch(e){}
+}
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  document.getElementById('bn-'+id).classList.add('on');
+  if(id==='map') setTimeout(()=>navMap?.invalidateSize(),200);
+}
+
+function authTab2(tab){ authTab(tab); }
+function otpNext(el,nid){if(el.value&&nid)document.getElementById(nid)?.focus()}
+function otpBack(el,e,pid){if(e.key==='Backspace'&&!el.value)document.getElementById(pid)?.focus()}
+function startTimer(btnId,timerId,secs){
+  clearInterval(resendTimer);
+  document.getElementById(btnId).style.display='none';
+  let s=secs;
+  resendTimer=setInterval(()=>{
+    document.getElementById(timerId).textContent=' ('+s+'ث)';s--;
+    if(s<0){clearInterval(resendTimer);document.getElementById(timerId).textContent='';document.getElementById(btnId).style.display='inline';}
+  },1000);
+}
+function setBtn(id,dis,txt){const b=document.getElementById(id);if(b){b.disabled=dis;b.textContent=txt;}}
+function authErr(msg){const e=document.getElementById('auth-err');e.textContent=msg;e.style.display='block';}
+function hideErr(){document.getElementById('auth-err').style.display='none';}
+function otpErrMsg(code){return{
+  'auth/invalid-phone-number':'رقم الجوال غير صحيح',
+  'auth/too-many-requests':'محاولات كثيرة، حاول لاحقاً',
+  'auth/captcha-check-failed':'فشل التحقق، حاول مجدداً',
+}[code]||'تعذر الإرسال';}
+function triggerFile(id){document.getElementById(id).click()}
+function previewPhoto(input,previewId){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{const el=document.getElementById(previewId);el.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;}
+  r.readAsDataURL(f);
+}
+function markFile(input,boxId,checkId){
+  if(input.files[0]){
+    document.getElementById(boxId).classList.add('file-done');
+    document.getElementById(checkId).textContent='✅';
+    toast('✅ تم اختيار الملف', 'ok');
+  }
+}
+async function checkActivation(){
+  if(!currentUser){ showScreen('auth'); return; }
+  toast('🔄 جاري التحقق...', '');
+  // في الوضع التجريبي — ابحث في Firebase
+  if(DEMO_MODE && window._fbReady && techData){
+    try {
+      const snap = await window._getDoc('techs', techData.uid);
+      if(snap.exists()){
+        const d = snap.data();
+        techData = {...techData, ...d};
+        localStorage.setItem('tl_tech_'+techData.uid, JSON.stringify(techData));
+        if(techData.status==='active'){
+          launchApp();
+          toast('✅ تم تفعيل حسابك! مرحباً بك', 'ok');
+        } else if(techData.status==='rejected'||techData.status==='blocked'){
+          showScreen('blocked');
+        } else {
+          toast('⏳ حسابك لا يزال قيد المراجعة', '');
+        }
+      }
+    } catch(e){ toast('تعذر التحقق', 'err'); }
+    return;
+  }
+  await loadTechData();
+}
+
+function doLogout(){
+  if(!confirm('تسجيل الخروج؟'))return;
+  if(DEMO_MODE){ currentUser=null; techData=null; showScreen('auth'); return; }
+  window._fbLogout?.();
+}
+function toast(msg,type){
+  const el=document.createElement('div');
+  el.className='toast '+(type==='ok'?'ok':type==='err'?'err':'');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+</script>
+</body>
+</html>
