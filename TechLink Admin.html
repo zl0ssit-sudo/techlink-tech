@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechLink — لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+  apiKey:"AIzaSyCqJokUc0LbG4387K0uLSe2i_anBSsG-dM",
+  authDomain:"command-fix.firebaseapp.com",
+  projectId:"command-fix",
+  storageBucket:"command-fix.firebasestorage.app",
+  messagingSenderId:"218796531794",
+  appId:"1:218796531794:web:751ff2fa49e216cb023f8b"
+};
+
+const app  = initializeApp(cfg);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+window._db   = db;
+window._auth = auth;
+window._col  = c => collection(db,c);
+window._doc  = (c,id) => doc(db,c,id);
+window._upd  = (c,id,d) => updateDoc(doc(db,c,id),d);
+  window._addDoc = addDoc;
+window._del  = (c,id)   => deleteDoc(doc(db,c,id));
+window._getDoc = (c,id) => getDoc(doc(db,c,id));
+window._setDoc = (c,id,d) => setDoc(doc(db,c,id),d,{merge:true});
+window._onSnap = onSnapshot;
+window._query  = query;
+window._orderBy= orderBy;
+window._where  = where;
+window._login  = (e,p) => signInWithEmailAndPassword(auth,e,p);
+window._logout = () => signOut(auth);
+window._authState = cb => onAuthStateChanged(auth,cb);
+window._fbReady = true;
+</script>
+
+<style>
+:root{
+  --bg:#07090f;--s1:#0e1117;--s2:#141820;--s3:#1a1f2e;
+  --bd:#1f2535;--gold:#f0a500;--gold2:#e06c00;
+  --blue:#3b82f6;--green:#10b981;--red:#ef4444;--orange:#f97316;
+  --purple:#8b5cf6;--text:#eef0f6;--muted:#64748b;
+  --sans:'Cairo',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,165,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(240,165,0,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.auth-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:28px}
+.auth-ic{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:22px}
+.auth-title{font-size:24px;font-weight:900}.auth-title span{color:var(--gold)}
+.auth-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:22px}
+.auth-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:12px;padding:10px 13px;border-radius:8px;margin-bottom:12px;display:none;text-align:center}
+.fi{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;color:var(--text);font-family:var(--sans);font-size:14px;width:100%;outline:none;transition:border-color .15s;margin-bottom:10px}
+.fi:focus{border-color:var(--gold)}
+.btn-login{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f;font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer}
+
+/* LAYOUT */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--s1);border-left:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:20px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.logo-ic{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-txt{font-size:19px;font-weight:900}.logo-txt span{color:var(--gold)}
+.logo-badge{font-size:9px;background:rgba(239,68,68,.2);color:var(--red);border-radius:4px;padding:2px 6px;font-weight:700;margin-right:4px}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:2px}
+.ns{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:10px 10px 4px}
+.ni{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;transition:all .15s;border:1px solid transparent}
+.ni:hover{background:var(--s2);color:var(--text)}
+.ni.on{background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.2);color:var(--gold)}
+.ni-l{display:flex;align-items:center;gap:9px}
+.ni-badge{background:var(--red);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.sb-foot{padding:12px 18px;border-top:1px solid var(--bd);font-size:11px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;justify-content:space-between}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;display:inline-block;margin-left:5px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:13px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-t{font-size:15px;font-weight:700}
+.topbar-t small{color:var(--muted);font-weight:400;font-size:12px;margin-right:8px}
+.topbar-r{display:flex;gap:8px;align-items:center}
+.chip{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--mono)}
+.chip-gold{background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.25);color:var(--gold)}
+.chip-green{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green)}
+.chip-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.chip-blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--blue)}
+.chip-purple{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:var(--purple)}
+
+/* PAGES */
+.page{display:none;padding:22px;animation:fu .2s ease}.page.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:border-color .2s;cursor:default}
+.sc:hover{border-color:rgba(240,165,0,.2)}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.sc:hover::after{opacity:1}
+.sc-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.sc-val{font-size:26px;font-weight:900;font-family:var(--mono);letter-spacing:-1px}
+.sc-val.g{color:var(--gold)}.sc-val.gr{color:var(--green)}.sc-val.b{color:var(--blue)}.sc-val.r{color:var(--red)}.sc-val.p{color:var(--purple)}
+.sc-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.sc-icon{position:absolute;top:14px;left:14px;font-size:22px;opacity:.15}
+
+/* PANEL */
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.ph{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.pt{font-size:14px;font-weight:700}
+.pb{padding:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+thead tr{background:var(--s2)}
+th{padding:9px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tbody tr:hover{background:rgba(255,255,255,.015)}
+tbody tr:last-child td{border-bottom:none}
+.mono{font-family:var(--mono);font-size:11px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.t-pend{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.2)}
+.t-prog{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.t-done{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.t-cancel{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.t-review{background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2)}
+.t-active{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.t-blocked{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* FORM */
+.fr{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fii{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--sans);font-size:13px;width:100%;outline:none;transition:border-color .15s}
+.fii:focus{border-color:var(--gold)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;border:none;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-p{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f}
+.btn-g{background:var(--s2);border:1px solid var(--bd);color:var(--text)}.btn-g:hover{border-color:var(--gold);color:var(--gold)}
+.btn-gr{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:var(--green)}.btn-gr:hover{background:rgba(16,185,129,.2)}
+.btn-r{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}.btn-r:hover{background:rgba(239,68,68,.2)}
+.btn-b{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--blue)}.btn-b:hover{background:rgba(59,130,246,.2)}
+.btn-pur{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--purple)}
+.btn-full{width:100%;justify-content:center}
+
+/* TECH CARD */
+.tech-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px;transition:border-color .2s}
+.tech-card:hover{border-color:rgba(240,165,0,.2)}
+.tc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tc-av{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#07090f;overflow:hidden;flex-shrink:0}
+.tc-av img{width:100%;height:100%;object-fit:cover}
+.tc-name{font-size:15px;font-weight:700}
+.tc-spec{font-size:12px;color:var(--muted)}
+.tc-docs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.doc-thumb{border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:var(--s3);cursor:pointer;position:relative}
+.doc-thumb img{width:100%;height:100%;object-fit:cover}
+.doc-thumb-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);font-size:10px;padding:3px 6px;color:#fff;text-align:center}
+.tc-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tc-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.tci{background:var(--s1);border-radius:8px;padding:8px 10px}
+.tci-lbl{font-size:10px;color:var(--muted);margin-bottom:2px}
+.tci-val{font-size:13px;font-weight:700}
+
+/* WALLET */
+.w-hero{background:linear-gradient(135deg,#0f1623,#1a2035);border:1px solid rgba(240,165,0,.2);border-radius:14px;padding:20px;margin-bottom:14px}
+.w-bal{font-size:32px;font-weight:900;color:var(--gold);font-family:var(--mono)}
+.w-lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+.txn{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}
+.txn:last-child{border-bottom:none}
+.txn-l{display:flex;align-items:center;gap:9px}
+.txn-ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
+.txn-ic.in{background:rgba(16,185,129,.1)}.txn-ic.out{background:rgba(239,68,68,.1)}
+.txn-name{font-size:13px;font-weight:600}.txn-date{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.txn-amt{font-family:var(--mono);font-weight:700;font-size:13px}
+.txn-amt.in{color:var(--green)}.txn-amt.out{color:var(--red)}
+
+/* MAP */
+#admin-map{height:420px;border-radius:12px;border:1px solid var(--bd)}
+.leaflet-container{background:#1a1f2e !important}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.on{display:flex}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal h3{font-size:16px;font-weight:800;margin-bottom:14px}
+.mact{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.mact .btn{flex:1;justify-content:center}
+
+/* NOTIFY */
+.notif-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:border-color .15s}
+.notif-card:hover{border-color:rgba(240,165,0,.2)}
+.notif-card.unread{border-right:3px solid var(--gold)}
+.notif-ic{font-size:20px;flex-shrink:0;margin-top:2px}
+.notif-title{font-size:13px;font-weight:700}
+.notif-sub{font-size:12px;color:var(--muted)}
+.notif-time{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:4px}
+
+/* FILTER */
+.fbar{background:var(--s2);border-bottom:1px solid var(--bd);padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.fbar .fii{font-size:12px;padding:7px 10px;width:auto}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ic{font-size:40px;margin-bottom:8px;opacity:.3}
+
+/* TOAST */
+#toasts{position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--s1);border:1px solid var(--bd);border-right:3px solid var(--gold);border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.5);min-width:220px;animation:tIn .2s ease}
+.toast.ok{border-right-color:var(--green)}.toast.err{border-right-color:var(--red)}
+@keyframes tIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.three{grid-template-columns:1fr}}
+@media(max-width:500px){.stats{grid-template-columns:1fr 1fr}.page{padding:12px}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-ic">⚙️</div>
+      <div>
+        <div class="auth-title">Tech<span>Link</span></div>
+        <div style="font-size:11px;color:var(--muted)">لوحة تحكم المدير</div>
+      </div>
+    </div>
+    <div class="auth-sub">تسجيل دخول المدير فقط</div>
+    <div class="auth-err" id="auth-err"></div>
+    <input class="fi" type="email" id="a-email" placeholder="البريد الإلكتروني">
+    <input class="fi" type="password" id="a-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" id="login-btn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="main-app" style="display:none">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-ic">⚙️</div>
+    <div class="logo-txt">Tech<span>Link</span> <span class="logo-badge">ADMIN</span></div>
+  </div>
+  <nav class="nav">
+    <div class="ns">الرئيسية</div>
+    <div class="ni on" onclick="go('dash',this)"><div class="ni-l"><span>📊</span>لوحة التحكم</div></div>
+    <div class="ni" onclick="go('orders',this)"><div class="ni-l"><span>📋</span>الطلبات</div><span class="ni-badge" id="nb-orders">0</span></div>
+    <div class="ni" onclick="go('map',this)"><div class="ni-l"><span>🗺️</span>خريطة حية</div></div>
+    <div class="ns">الفنيون</div>
+    <div class="ni" onclick="go('pending-techs',this)"><div class="ni-l"><span>⏳</span>طلبات التسجيل</div><span class="ni-badge" id="nb-pending" style="background:var(--purple)">0</span></div>
+    <div class="ni" onclick="go('techs',this)"><div class="ni-l"><span>👷</span>الفنيون النشطون</div></div>
+    <div class="ns">المالية</div>
+    <div class="ni" onclick="go('wallet',this)"><div class="ni-l"><span>💰</span>المحفظة والعمولات</div></div>
+    <div class="ns">الزبائن</div>
+    <div class="ni" onclick="go('customers',this)"><div class="ni-l"><span>👤</span>الزبائن</div></div>
+    <div class="ni" onclick="go('add-customer',this)"><div class="ni-l"><span>➕</span>إضافة زبون</div></div>
+    <div class="ns">الإشعارات</div>
+    <div class="ni" onclick="go('notifs',this)"><div class="ni-l"><span>🔔</span>الإشعارات</div><span class="ni-badge" id="nb-notifs" style="background:var(--blue)">0</span></div>
+  </nav>
+  <div class="sb-foot">
+    <span><span class="ldot"></span> Firebase Live</span>
+    <span style="cursor:pointer;color:var(--red)" onclick="doLogout()">خروج 🚪</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+  <div class="topbar-t">TechLink Admin <small id="pname">/ لوحة التحكم</small></div>
+  <div class="topbar-r">
+    <button class="btn btn-p" onclick="openNewOrderModal()" style="padding:7px 14px">➕ طلب جديد</button>
+    <span class="chip chip-green" id="fb-st">🟢 متصل</span>
+    <span class="chip chip-gold" id="top-date"></span>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page on" id="p-dash">
+  <div class="stats">
+    <div class="sc"><div class="sc-icon">📋</div><div class="sc-lbl">إجمالي الطلبات</div><div class="sc-val g" id="st-orders">0</div><div class="sc-sub">كل الحالات</div></div>
+    <div class="sc"><div class="sc-icon">⏳</div><div class="sc-lbl">قيد الانتظار</div><div class="sc-val b" id="st-pending">0</div><div class="sc-sub">بانتظار فني</div></div>
+    <div class="sc"><div class="sc-icon">✅</div><div class="sc-lbl">مكتملة اليوم</div><div class="sc-val gr" id="st-done">0</div><div class="sc-sub">طلبات منجزة</div></div>
+    <div class="sc"><div class="sc-icon">💰</div><div class="sc-lbl">عمولات المنصة</div><div class="sc-val g" id="st-comm">0</div><div class="sc-sub">ريال / دينار</div></div>
+    <div class="sc"><div class="sc-icon">👷</div><div class="sc-lbl">الفنيون النشطون</div><div class="sc-val b" id="st-techs">0</div><div class="sc-sub">مفعّل</div></div>
+    <div class="sc"><div class="sc-icon">⏳</div><div class="sc-lbl">بانتظار التفعيل</div><div class="sc-val p" id="st-review">0</div><div class="sc-sub">طلبات فنيين</div></div>
+    <div class="sc"><div class="sc-icon">👤</div><div class="sc-lbl">الزبائن</div><div class="sc-val b" id="st-custs">0</div><div class="sc-sub">مسجل</div></div>
+    <div class="sc"><div class="sc-icon">🔴</div><div class="sc-lbl">ملغية</div><div class="sc-val r" id="st-cancel">0</div><div class="sc-sub">طلبات ملغاة</div></div>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="ph"><div class="pt">📋 آخر الطلبات</div><button class="btn btn-g" onclick="go('orders',null)" style="font-size:11px;padding:5px 10px">عرض الكل</button></div>
+      <div class="tw"><table><thead><tr><th>رقم</th><th>الخدمة</th><th>الزبون</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody id="dash-orders"></tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="pt">⏳ طلبات تسجيل الفنيين</div><button class="btn btn-pur" onclick="go('pending-techs',null)" style="font-size:11px;padding:5px 10px">مراجعة</button></div>
+      <div class="pb" id="dash-pending-techs"><div class="empty"><div class="empty-ic">👷</div><div style="font-size:13px">لا توجد طلبات</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="page" id="p-orders">
+  <div class="panel">
+    <div class="ph"><div class="pt">📋 جميع الطلبات</div><span class="chip chip-gold" id="orders-count">0</span></div>
+    <div class="fbar">
+      <div class="fr" style="margin-bottom:0"><label class="fl">الحالة</label>
+        <select class="fii" id="f-status" onchange="renderOrders()">
+          <option value="">الكل</option><option value="pending">انتظار</option>
+          <option value="inprogress">جارٍ</option><option value="done">مكتمل</option><option value="cancelled">ملغي</option>
+        </select>
+      </div>
+      <div class="fr" style="margin-bottom:0"><label class="fl">الخدمة</label>
+        <select class="fii" id="f-service" onchange="renderOrders()">
+          <option value="">الكل</option><option value="electric">كهرباء</option><option value="plumb">سباكة</option>
+          <option value="ac">تكييف</option><option value="paint">دهانات</option><option value="carp">نجارة</option>
+          <option value="clean">تنظيف</option><option value="tile">بلاط</option><option value="other">أخرى</option>
+        </select>
+      </div>
+      <div class="fr" style="margin-bottom:0"><label class="fl">من</label><input class="fii" type="date" id="f-from" onchange="renderOrders()"></div>
+      <div class="fr" style="margin-bottom:0"><label class="fl">إلى</label><input class="fii" type="date" id="f-to" onchange="renderOrders()"></div>
+      <div class="fr" style="margin-bottom:0"><label class="fl">بحث</label><input class="fii" id="f-q" placeholder="رقم / زبون / فني..." oninput="renderOrders()" style="width:140px"></div>
+      <button class="btn btn-g" style="align-self:flex-end" onclick="clearF()">مسح</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>الزبون</th><th>الفني</th><th>الخدمة</th><th>الدفع</th><th>الحالة</th><th>إجراء</th></tr></thead>
+    <tbody id="orders-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="page" id="p-map">
+  <div class="panel">
+    <div class="ph"><div class="pt">🗺️ خريطة الطلبات الحية</div>
+      <div style="display:flex;gap:8px">
+        <span class="chip chip-blue">🔵 زبون</span>
+        <span class="chip chip-gold">🟡 فني</span>
+        <span class="chip chip-green">🟢 مكتمل</span>
+      </div>
+    </div>
+    <div class="pb"><div id="admin-map"></div></div>
+  </div>
+</div>
+
+<!-- PENDING TECHS -->
+<div class="page" id="p-pending-techs">
+  <div class="panel">
+    <div class="ph"><div class="pt">⏳ طلبات تسجيل الفنيين — بانتظار المراجعة</div></div>
+    <div class="pb" id="pending-techs-list"><div class="empty"><div class="empty-ic">👷</div><div style="font-size:13px">لا توجد طلبات معلقة</div></div></div>
+  </div>
+</div>
+
+<!-- ACTIVE TECHS -->
+<div class="page" id="p-techs">
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">👷 الفنيون النشطون</div>
+      <input class="fii" id="tech-q" placeholder="🔍 بحث..." oninput="renderActiveTechs()" style="width:160px;font-size:12px;padding:6px 10px">
+    </div>
+    <div class="tw"><table><thead><tr><th>الفني</th><th>التخصص</th><th>المدينة</th><th>الجوال</th><th>المحفظة</th><th>الطلبات</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    <tbody id="techs-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- WALLET -->
+<div class="page" id="p-wallet">
+  <div class="two">
+    <div>
+      <div class="w-hero">
+        <div class="w-lbl">💰 عمولات المنصة المحصّلة</div>
+        <div class="w-bal" id="plat-bal">0 <span style="font-size:16px;color:var(--muted)">ريال</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">10% من كل طلب مكتمل</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px;text-align:center">
+          <div style="font-size:20px;font-weight:900;font-family:var(--mono);color:var(--green)" id="w-total-comm">0</div>
+          <div style="font-size:10px;color:var(--muted)">إجمالي العمولات</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px;text-align:center">
+          <div style="font-size:20px;font-weight:900;font-family:var(--mono);color:var(--blue)" id="w-orders-done">0</div>
+          <div style="font-size:10px;color:var(--muted)">طلبات مكتملة</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:13px;text-align:center">
+          <div style="font-size:20px;font-weight:900;font-family:var(--mono);color:var(--gold)" id="w-avg-comm">0</div>
+          <div style="font-size:10px;color:var(--muted)">متوسط العمولة</div>
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><div class="pt">📜 سجل العمولات</div></div><div class="pb" id="comm-list"></div></div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="ph"><div class="pt">💸 شحن محفظة فني</div></div>
+        <div class="pb">
+          <div class="fr"><label class="fl">اختر الفني</label><select class="fii" id="charge-tech-sel"></select></div>
+          <div class="fr"><label class="fl">المبلغ</label><input class="fii" type="number" id="charge-amt" placeholder="0"></div>
+          <div class="fr"><label class="fl">ملاحظة</label><input class="fii" id="charge-note" placeholder="سبب الشحن"></div>
+          <button class="btn btn-p btn-full" onclick="chargeTechWallet()">شحن المحفظة</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">💼 محافظ الفنيين</div></div>
+        <div class="tw"><table><thead><tr><th>الفني</th><th>الرصيد</th><th>الحالة</th></tr></thead><tbody id="wallets-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMERS -->
+<div class="page" id="p-customers">
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">👤 الزبائن المسجلون</div>
+      <input class="fii" id="cust-q" placeholder="🔍 بحث..." oninput="renderCustomers()" style="width:160px;font-size:12px;padding:6px 10px">
+    </div>
+    <div class="tw"><table><thead><tr><th>الاسم</th><th>رقم الجوال</th><th>المدينة</th><th>المحفظة</th><th>الطلبات</th><th>آخر طلب</th><th>إجراء</th></tr></thead>
+    <tbody id="custs-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER -->
+<div class="page" id="p-add-customer">
+  <div class="panel" style="max-width:560px;margin:0 auto">
+    <div class="ph"><div class="pt">➕ إضافة زبون جديد</div></div>
+    <div class="pb">
+      <div class="frow">
+        <div class="fr"><label class="fl">الاسم</label><input class="fii" id="nc-name" placeholder="اسم الزبون"></div>
+        <div class="fr"><label class="fl">رقم الجوال</label><input class="fii" id="nc-phone" placeholder="+9647xxxxxxxxx"></div>
+      </div>
+      <div class="fr"><label class="fl">المدينة</label><input class="fii" id="nc-city" placeholder="بغداد، البصرة..."></div>
+      <div class="fr"><label class="fl">رصيد المحفظة الأولي</label><input class="fii" type="number" id="nc-wallet" value="0" placeholder="0"></div>
+      <button class="btn btn-p btn-full" onclick="addCustomerAdmin()" style="margin-top:6px">إضافة الزبون</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="page" id="p-notifs">
+  <div class="panel">
+    <div class="ph"><div class="pt">🔔 الإشعارات</div><button class="btn btn-g" style="font-size:11px" onclick="markAllRead()">تحديد الكل كمقروء</button></div>
+    <div class="pb" id="notifs-list"><div class="empty"><div class="empty-ic">🔔</div><div style="font-size:13px">لا توجد إشعارات</div></div></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-bg" id="ord-modal">
+  <div class="modal">
+    <h3 id="om-title">تفاصيل الطلب</h3>
+    <div id="om-body"></div>
+    <div class="mact" id="om-acts"></div>
+  </div>
+</div>
+
+<!-- TECH DETAIL MODAL -->
+<div class="modal-bg" id="tech-modal">
+  <div class="modal">
+    <h3 id="tm-title">بيانات الفني</h3>
+    <div id="tm-body"></div>
+    <div class="mact" id="tm-acts"></div>
+  </div>
+</div>
+
+<!-- NEW ORDER MODAL -->
+<div class="modal-bg" id="new-order-modal">
+  <div class="modal">
+    <h3>➕ إنشاء طلب جديد</h3>
+    <div class="frow">
+      <div class="fr"><label class="fl">اسم الزبون / رقمه</label><input class="fii" id="no-cust" placeholder="الاسم أو رقم الجوال"></div>
+      <div class="fr"><label class="fl">الفني</label>
+        <select class="fii" id="no-tech">
+          <option value="">— اختر فني —</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fr"><label class="fl">نوع الخدمة</label>
+        <select class="fii" id="no-service">
+          <option value="electric">⚡ كهرباء</option>
+          <option value="plumb">🔧 سباكة</option>
+          <option value="ac">❄️ تكييف</option>
+          <option value="paint">🎨 دهانات</option>
+          <option value="carp">🪚 نجارة</option>
+          <option value="clean">🧹 تنظيف</option>
+          <option value="tile">🏠 بلاط</option>
+          <option value="other">🛠️ أخرى</option>
+        </select>
+      </div>
+      <div class="fr"><label class="fl">طريقة الدفع</label>
+        <select class="fii" id="no-pay">
+          <option value="cash">💵 نقداً</option>
+          <option value="wallet-customer">📱 محفظة الزبون</option>
+          <option value="wallet-tech">💼 محفظة الفني</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fr"><label class="fl">المبلغ</label><input class="fii" type="number" id="no-amount" placeholder="0"></div>
+      <div class="fr"><label class="fl">التاريخ والوقت</label><input class="fii" type="datetime-local" id="no-datetime"></div>
+    </div>
+    <div class="fr"><label class="fl">وصف الطلب</label><input class="fii" id="no-desc" placeholder="تفاصيل الخدمة المطلوبة"></div>
+    <div class="mact">
+      <button class="btn btn-p" onclick="createOrderAdmin()" style="flex:1;justify-content:center">إنشاء الطلب</button>
+      <button class="btn btn-g" onclick="closeModal('new-order-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER DETAIL MODAL -->
+<div class="modal-bg" id="cust-modal">
+  <div class="modal">
+    <h3 id="cm-title">تفاصيل الزبون</h3>
+    <div id="cm-body"></div>
+    <div class="mact">
+      <button class="btn btn-g" onclick="closeModal('cust-modal')" style="flex:1;justify-content:center">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let allOrders   = [];
+let allTechs    = [];
+let allCustomers= [];
+let notifications= [];
+let platComm    = 0;
+let adminUser   = null;
+
+const SVC = {electric:'⚡ كهرباء',plumb:'🔧 سباكة',ac:'❄️ تكييف',paint:'🎨 دهانات',carp:'🪚 نجارة',clean:'🧹 تنظيف',tile:'🏠 بلاط',other:'🛠️ أخرى'};
+
+// ══════════════════════════════
+// AUTH
+// ══════════════════════════════
+async function doLogin(){
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  if(!email||!pass){ authErr('أدخل البريد وكلمة المرور'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.textContent='جاري الدخول...';
+  btn.disabled=true;
+  document.getElementById('auth-err').style.display='none';
+
+  if(!window._fbReady){
+    btn.textContent='دخول'; btn.disabled=false;
+    authErr('Firebase غير متصل — تحقق من الاتصال بالإنترنت'); return;
+  }
+
+  try {
+    await window._login(email, pass);
+    // onAuthStateChanged سيتولى إظهار التطبيق
+  } catch(e) {
+    btn.textContent='دخول';
+    btn.disabled=false;
+    const msgs={
+      'auth/wrong-password':'كلمة المرور غير صحيحة',
+      'auth/user-not-found':'البريد الإلكتروني غير مسجل',
+      'auth/invalid-credential':'البريد أو كلمة المرور غير صحيحة',
+      'auth/invalid-email':'صيغة البريد غير صحيحة',
+      'auth/too-many-requests':'محاولات كثيرة — حاول لاحقاً',
+      'auth/network-request-failed':'خطأ في الاتصال بالإنترنت',
+    };
+    authErr(msgs[e.code]||'خطأ: '+e.message);
+  }
+}
+function authErr(m){const e=document.getElementById('auth-err');e.textContent=m;e.style.display='block';}
+function doLogout(){if(!confirm('تسجيل الخروج؟'))return;window._logout?.();}
+
+// ══════════════════════════════
+// INIT LISTENERS
+// ══════════════════════════════
+function initListeners(){
+  // Orders
+  window._onSnap(window._query(window._col('orders'),window._orderBy('ts','desc')), snap=>{
+    allOrders = snap.docs.map(d=>({docId:d.id,...d.data()}));
+    renderAll();
+    checkNewOrders();
+  });
+  // Techs
+  window._onSnap(window._col('techs'), snap=>{
+    allTechs = snap.docs.map(d=>({docId:d.id,...d.data()}));
+    renderAll();
+    checkPendingTechs();
+  });
+  setTimeout(initAdminMap,400);
+}
+
+function checkNewOrders(){
+  const pending = allOrders.filter(o=>o.status==='pending').length;
+  document.getElementById('nb-orders').textContent = pending;
+  document.getElementById('nb-orders').style.display = pending?'flex':'none';
+}
+function checkPendingTechs(){
+  const p = allTechs.filter(t=>t.status==='pending').length;
+  document.getElementById('nb-pending').textContent = p;
+  document.getElementById('nb-pending').style.display = p?'flex':'none';
+  document.getElementById('st-review').textContent = p;
+  // Add notifications for new pending techs
+  if(p>0){
+    const n = {id:'pt_'+Date.now(),title:'طلب تسجيل فني جديد',sub:p+' فني بانتظار المراجعة',time:new Date().toLocaleTimeString('ar-SA'),read:false,type:'tech'};
+    if(!notifications.find(x=>x.type==='tech'&&!x.read)){
+      notifications.unshift(n);
+      document.getElementById('nb-notifs').textContent=notifications.filter(x=>!x.read).length;
+      renderNotifs();
+    }
+  }
+}
+
+// ══════════════════════════════
+// RENDER ALL
+// ══════════════════════════════
+function renderAll(){
+  renderStats();
+  renderOrders();
+  renderDashOrders();
+  renderPendingTechs();
+  renderActiveTechs();
+  renderCustomers();
+  renderWallet();
+  populateSelects();
+  updateMapMarkers();
+}
+
+// ══════════════════════════════
+// STATS
+// ══════════════════════════════
+function renderStats(){
+  const done    = allOrders.filter(o=>o.status==='done');
+  const today   = new Date().toISOString().slice(0,10);
+  const todayDone=done.filter(o=>o.dateISO===today||o.ts>Date.now()-86400000);
+  const comm    = done.reduce((s,o)=>s+(o.commission||0),0);
+  platComm = comm;
+
+  si('st-orders', allOrders.length);
+  si('st-pending', allOrders.filter(o=>o.status==='pending').length);
+  si('st-done',   todayDone.length);
+  si('st-comm',   comm.toFixed(0));
+  si('st-techs',  allTechs.filter(t=>t.status==='active').length);
+  si('st-review', allTechs.filter(t=>t.status==='pending').length);
+  si('st-cancel', allOrders.filter(o=>o.status==='cancelled').length);
+
+  // unique customers by phone
+  const phones = new Set(allOrders.map(o=>o.custPhone).filter(Boolean));
+  si('st-custs', phones.size);
+}
+
+// ══════════════════════════════
+// ORDERS
+// ══════════════════════════════
+function getFilteredOrders(){
+  const st=val('f-status'),sv=val('f-service'),fr=val('f-from'),to=val('f-to'),q=val('f-q').toLowerCase();
+  return allOrders.filter(o=>{
+    if(st&&o.status!==st)return false;
+    if(sv&&o.service!==sv)return false;
+    if(fr&&o.dateISO&&o.dateISO<fr)return false;
+    if(to&&o.dateISO&&o.dateISO>to)return false;
+    if(q&&!(o.docId?.toLowerCase().includes(q)||o.id?.toLowerCase().includes(q)||(o.custPhone||'').includes(q)||(o.techName||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+}
+function clearF(){['f-status','f-service','f-from','f-to','f-q'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderOrders();}
+
+function stTag(s){
+  const m={pending:'t-pend',inprogress:'t-prog',done:'t-done',cancelled:'t-cancel'};
+  const l={pending:'انتظار',inprogress:'جارٍ',done:'مكتمل',cancelled:'ملغي'};
+  return`<span class="tag ${m[s]||''}">${l[s]||s}</span>`;
+}
+function payLbl(p){return{cash:'💵 نقد','wallet-customer':'📱 زبون','wallet-tech':'💼 فني'}[p]||p;}
+
+function renderOrders(){
+  const list=getFilteredOrders();
+  si('orders-count',list.length+' طلب');
+  const tb=document.getElementById('orders-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ic">📋</div><div style="font-size:13px">لا توجد طلبات</div></div></td></tr>';return;}
+  tb.innerHTML=list.map(o=>`<tr>
+    <td><span class="mono">${o.id||o.docId}</span></td>
+    <td><span class="mono" style="font-size:10px">${o.dateStr||o.datetime?.slice(0,10)||'—'}</span></td>
+    <td><span style="font-size:12px">${o.custPhone||'—'}</span></td>
+    <td>${o.techName||'<span style="color:var(--muted)">غير معيّن</span>'}</td>
+    <td>${SVC[o.service]||o.serviceLabel||o.service||'—'}</td>
+    <td>${payLbl(o.pay)}</td>
+    <td>${stTag(o.status)}</td>
+    <td><button class="btn btn-g" style="padding:4px 9px;font-size:11px" onclick="openOrderModal('${o.docId}')">تفاصيل</button></td>
+  </tr>`).join('');
+}
+
+function renderDashOrders(){
+  const tb=document.getElementById('dash-orders');
+  const list=allOrders.slice(0,6);
+  if(!list.length){tb.innerHTML='<tr><td colspan="5"><div class="empty" style="padding:20px"><div class="empty-ic" style="font-size:28px">📋</div></div></td></tr>';return;}
+  tb.innerHTML=list.map(o=>`<tr>
+    <td><span class="mono">${o.id||o.docId}</span></td>
+    <td>${SVC[o.service]||o.service||'—'}</td>
+    <td style="font-size:12px">${o.custPhone||'—'}</td>
+    <td>${stTag(o.status)}</td>
+    <td><span class="mono" style="font-size:10px">${o.dateStr||'—'}</span></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════
+// ORDER MODAL
+// ══════════════════════════════
+function openOrderModal(docId){
+  const o=allOrders.find(x=>x.docId===docId);if(!o)return;
+  document.getElementById('om-title').textContent='📋 '+(o.id||docId);
+  document.getElementById('om-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الزبون</div><div style="font-weight:700;font-size:13px">${o.custPhone||'—'}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الفني</div><div style="font-weight:700;font-size:13px">${o.techName||'غير معيّن'}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الخدمة</div><div style="font-weight:700">${SVC[o.service]||o.service}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">طريقة الدفع</div><div style="font-weight:700">${payLbl(o.pay)}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">التاريخ</div><div style="font-size:12px">${o.datetime||o.dateStr||'—'}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الحالة</div>${stTag(o.status)}</div>
+    </div>
+    <div style="background:var(--s2);border-radius:8px;padding:10px;margin-bottom:12px"><div class="fl">الوصف</div><div style="font-size:13px">${o.desc||'—'}</div></div>
+    ${o.lat?`<div id="om-map" style="height:180px;border-radius:10px;border:1px solid var(--bd);margin-bottom:10px"></div>`:''}
+  `;
+  const acts=document.getElementById('om-acts');
+  acts.innerHTML='<button class="btn btn-g" onclick="closeModal(\'ord-modal\')">إغلاق</button>';
+  if(o.status==='pending'){
+    acts.innerHTML+=`<button class="btn btn-gr" onclick="updateOrderStatus('${docId}','inprogress')">▶ بدء</button>`;
+    acts.innerHTML+=`<button class="btn btn-r" onclick="updateOrderStatus('${docId}','cancelled')">✕ إلغاء</button>`;
+  }
+  if(o.status==='inprogress'){
+    acts.innerHTML+=`<button class="btn btn-gr" onclick="updateOrderStatus('${docId}','done')">✅ إتمام</button>`;
+    acts.innerHTML+=`<button class="btn btn-r" onclick="updateOrderStatus('${docId}','cancelled')">✕ إلغاء</button>`;
+  }
+  document.getElementById('ord-modal').classList.add('on');
+  if(o.lat){setTimeout(()=>{
+    const m=L.map('om-map').setView([o.lat,o.lng],14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(m);
+    L.marker([o.lat,o.lng]).addTo(m).bindPopup('📍 موقع الزبون').openPopup();
+  },120);}
+}
+
+async function updateOrderStatus(docId,status){
+  try{
+    await window._upd('orders',docId,{status});
+    closeModal('ord-modal');
+    toast('✅ تم تحديث حالة الطلب إلى: '+status,'ok');
+  }catch(e){toast('خطأ: '+e.message,'err');}
+}
+
+// ══════════════════════════════
+// TECHS - PENDING
+// ══════════════════════════════
+function renderPendingTechs(){
+  const list=allTechs.filter(t=>t.status==='pending');
+  const el=document.getElementById('pending-techs-list');
+  const el2=document.getElementById('dash-pending-techs');
+  if(!list.length){
+    const emp='<div class="empty"><div class="empty-ic">👷</div><div style="font-size:13px">لا توجد طلبات معلقة ✅</div></div>';
+    el.innerHTML=emp;el2.innerHTML=emp;return;
+  }
+  const html=list.map(t=>`
+    <div class="tech-card">
+      <div class="tc-top">
+        <div class="tc-av">${t.faceUrl?`<img src="${t.faceUrl}">`:(t.name||'?').slice(0,2)}</div>
+        <div style="flex:1">
+          <div class="tc-name">${t.name||'—'}</div>
+          <div class="tc-spec">${SVC[t.service]||t.service||'—'} · ${t.city||'—'} · ${t.phone||'—'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)">${t.createdAt?.slice(0,10)||'—'}</div>
+        </div>
+        <span class="tag t-review">⏳ مراجعة</span>
+      </div>
+      ${(t.idFUrl||t.idBUrl||t.resUrl||t.faceUrl)?`
+      <div class="tc-docs">
+        ${t.faceUrl?`<div class="doc-thumb" onclick="viewImg('${t.faceUrl}')"><img src="${t.faceUrl}"><div class="doc-thumb-lbl">صورة شخصية</div></div>`:''}
+        ${t.idFUrl?`<div class="doc-thumb" onclick="viewImg('${t.idFUrl}')"><img src="${t.idFUrl}"><div class="doc-thumb-lbl">وجه الهوية</div></div>`:''}
+        ${t.idBUrl?`<div class="doc-thumb" onclick="viewImg('${t.idBUrl}')"><img src="${t.idBUrl}"><div class="doc-thumb-lbl">ظهر الهوية</div></div>`:''}
+        ${t.resUrl?`<div class="doc-thumb" onclick="viewImg('${t.resUrl}')"><img src="${t.resUrl}"><div class="doc-thumb-lbl">السكن/الإقامة</div></div>`:''}
+      </div>`:'<div style="font-size:12px;color:var(--muted);margin-bottom:10px">⚠️ لا توجد مستندات (وضع تجريبي)</div>'}
+      <div class="tc-actions">
+        <button class="btn btn-gr" onclick="activateTech('${t.docId}','${t.name||''}')">✅ تفعيل الحساب</button>
+        <button class="btn btn-r" onclick="rejectTech('${t.docId}','${t.name||''}')">✕ رفض</button>
+        <button class="btn btn-b" onclick="openTechModal('${t.docId}')">👁️ تفاصيل</button>
+      </div>
+    </div>`).join('');
+  el.innerHTML=html;
+  el2.innerHTML=list.slice(0,2).map(t=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div class="tc-av" style="width:36px;height:36px;font-size:13px">${(t.name||'?').slice(0,2)}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${SVC[t.service]||t.service}</div></div>
+      <button class="btn btn-gr" style="padding:5px 9px;font-size:11px" onclick="activateTech('${t.docId}','${t.name||''}')">تفعيل</button>
+    </div>`).join('');
+}
+
+async function activateTech(docId, name){
+  if(!confirm('تفعيل حساب الفني: '+name+'؟'))return;
+  try{
+    await window._upd('techs',docId,{status:'active'});
+    toast('✅ تم تفعيل الفني: '+name,'ok');
+    notifications.unshift({id:'act_'+Date.now(),title:'تم تفعيل فني',sub:name+' — جاهز لاستقبال الطلبات',time:new Date().toLocaleTimeString('ar-SA'),read:false,type:'activation'});
+    renderNotifs();
+  }catch(e){toast('خطأ: '+e.message,'err');}
+}
+async function rejectTech(docId,name){
+  if(!confirm('رفض وحذف طلب الفني: '+name+'؟'))return;
+  try{
+    await window._upd('techs',docId,{status:'rejected'});
+    toast('🗑️ تم رفض الفني: '+name,'err');
+  }catch(e){toast('خطأ: '+e.message,'err');}
+}
+async function blockTech(docId,name){
+  if(!confirm('تعطيل حساب الفني: '+name+'؟'))return;
+  try{await window._upd('techs',docId,{status:'blocked'});toast('🔒 تم تعطيل الفني','err');}
+  catch(e){toast('خطأ','err');}
+}
+
+// ══════════════════════════════
+// TECHS - ACTIVE
+// ══════════════════════════════
+function renderActiveTechs(){
+  const q=(val('tech-q')||'').toLowerCase();
+  const list=allTechs.filter(t=>t.status==='active'&&(!q||t.name?.toLowerCase().includes(q)||t.phone?.includes(q)));
+  const tb=document.getElementById('techs-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ic">👷</div></div></td></tr>';return;}
+  tb.innerHTML=list.map(t=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px">
+      <div class="tc-av" style="width:32px;height:32px;font-size:12px">${t.faceUrl?`<img src="${t.faceUrl}">`:(t.name||'').slice(0,2)}</div>
+      <div><div style="font-weight:600;font-size:13px">${t.name||'—'}</div></div>
+    </div></td>
+    <td>${SVC[t.service]||t.service||'—'}</td>
+    <td>${t.city||'—'}</td>
+    <td><span class="mono">${t.phone||'—'}</span></td>
+    <td><span style="color:var(--gold);font-family:var(--mono)">${(t.wallet||0).toFixed(0)}</span></td>
+    <td>${t.ordersCount||0}</td>
+    <td><span class="tag t-active">✅ نشط</span></td>
+    <td style="display:flex;gap:5px;padding:10px 12px">
+      <button class="btn btn-b" style="padding:4px 8px;font-size:11px" onclick="openTechModal('${t.docId}')">تفاصيل</button>
+      <button class="btn btn-r" style="padding:4px 8px;font-size:11px" onclick="blockTech('${t.docId}','${t.name||''}')">تعطيل</button>
+    </td>
+  </tr>`).join('');
+}
+
+function openTechModal(docId){
+  const t=allTechs.find(x=>x.docId===docId);if(!t)return;
+  const myOrders=allOrders.filter(o=>o.techId===t.uid||o.techName===t.name);
+  document.getElementById('tm-title').textContent='👷 '+t.name;
+  document.getElementById('tm-body').innerHTML=`
+    <div class="tc-info">
+      <div class="tci"><div class="tci-lbl">التخصص</div><div class="tci-val">${SVC[t.service]||t.service||'—'}</div></div>
+      <div class="tci"><div class="tci-lbl">الجوال</div><div class="tci-val mono">${t.phone||'—'}</div></div>
+      <div class="tci"><div class="tci-lbl">المدينة</div><div class="tci-val">${t.city||'—'}</div></div>
+      <div class="tci"><div class="tci-lbl">المحفظة</div><div class="tci-val" style="color:var(--gold)">${(t.wallet||0).toFixed(0)} ريال</div></div>
+      <div class="tci"><div class="tci-lbl">الطلبات</div><div class="tci-val">${t.ordersCount||0}</div></div>
+      <div class="tci"><div class="tci-lbl">الحالة</div><div class="tci-val">${t.status==='active'?'✅ نشط':t.status==='pending'?'⏳ مراجعة':'🔒 موقوف'}</div></div>
+    </div>
+    ${(t.idFUrl||t.idBUrl)?`<div class="tc-docs">
+      ${t.faceUrl?`<div class="doc-thumb" onclick="viewImg('${t.faceUrl}')"><img src="${t.faceUrl}"><div class="doc-thumb-lbl">صورة شخصية</div></div>`:''}
+      ${t.idFUrl?`<div class="doc-thumb" onclick="viewImg('${t.idFUrl}')"><img src="${t.idFUrl}"><div class="doc-thumb-lbl">وجه الهوية</div></div>`:''}
+      ${t.idBUrl?`<div class="doc-thumb" onclick="viewImg('${t.idBUrl}')"><img src="${t.idBUrl}"><div class="doc-thumb-lbl">ظهر الهوية</div></div>`:''}
+      ${t.resUrl?`<div class="doc-thumb" onclick="viewImg('${t.resUrl}')"><img src="${t.resUrl}"><div class="doc-thumb-lbl">السكن</div></div>`:''}
+    </div>`:''}
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">آخر ${myOrders.length} طلبات:</div>
+    ${myOrders.slice(0,4).map(o=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px">
+      <span class="mono">${o.id||o.docId}</span>${stTag(o.status)}</div>`).join('')}
+  `;
+  const acts=document.getElementById('tm-acts');
+  acts.innerHTML='<button class="btn btn-g" onclick="closeModal(\'tech-modal\')">إغلاق</button>';
+  if(t.status==='pending') acts.innerHTML+=`<button class="btn btn-gr" onclick="activateTech('${docId}','${t.name||''}');closeModal('tech-modal')">✅ تفعيل</button>`;
+  if(t.status==='active')  acts.innerHTML+=`<button class="btn btn-r" onclick="blockTech('${docId}','${t.name||''}');closeModal('tech-modal')">🔒 تعطيل</button>`;
+  document.getElementById('tech-modal').classList.add('on');
+}
+
+function viewImg(url){window.open(url,'_blank');}
+
+// ══════════════════════════════
+// CUSTOMERS
+// ══════════════════════════════
+// قائمة الزبائن المضافين يدوياً
+let adminCustomers = JSON.parse(localStorage.getItem('tl_admin_custs')||'[]');
+
+function saveAdminCustomers(){
+  localStorage.setItem('tl_admin_custs', JSON.stringify(adminCustomers));
+}
+
+function addCustomerAdmin(){
+  const name   = document.getElementById('nc-name').value.trim();
+  const phone  = document.getElementById('nc-phone').value.trim();
+  const city   = document.getElementById('nc-city').value.trim();
+  const wallet = parseFloat(document.getElementById('nc-wallet').value)||0;
+  if(!name||!phone){toast('أدخل الاسم ورقم الجوال','err');return;}
+  adminCustomers.push({id:'C'+Date.now(),name,phone,city,wallet,orders:0,createdAt:new Date().toLocaleDateString('ar-SA')});
+  saveAdminCustomers();
+  document.getElementById('nc-name').value='';
+  document.getElementById('nc-phone').value='';
+  document.getElementById('nc-city').value='';
+  document.getElementById('nc-wallet').value='0';
+  renderCustomers();
+  toast('✅ تم إضافة الزبون: '+name,'ok');
+}
+
+function openCustomerModal(id){
+  const c = adminCustomers.find(x=>x.id===id);
+  if(!c)return;
+  const myOrders = allOrders.filter(o=>o.custPhone===c.phone);
+  document.getElementById('cm-title').textContent='👤 '+c.name;
+  document.getElementById('cm-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الاسم</div><div style="font-weight:700">${c.name}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الجوال</div><div class="mono">${c.phone}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">المدينة</div><div>${c.city||'—'}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">المحفظة</div><div style="color:var(--gold);font-family:var(--mono)">${(c.wallet||0).toFixed(0)}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">الطلبات</div><div>${myOrders.length}</div></div>
+      <div style="background:var(--s2);border-radius:8px;padding:10px"><div class="fl">تاريخ التسجيل</div><div class="mono" style="font-size:11px">${c.createdAt||'—'}</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">آخر الطلبات:</div>
+    ${myOrders.slice(0,4).map(o=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px">
+      <span class="mono">${o.id||o.docId}</span>${stTag(o.status)}</div>`).join('')||'<div style="color:var(--muted);font-size:12px">لا توجد طلبات</div>'}
+    <div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px">
+      <div class="fl" style="margin-bottom:8px">شحن المحفظة</div>
+      <div style="display:flex;gap:8px">
+        <input class="fii" type="number" id="cm-charge-amt" placeholder="المبلغ" style="flex:1">
+        <button class="btn btn-gr" onclick="chargeCustomerWallet('${id}')">شحن</button>
+      </div>
+    </div>`;
+  document.getElementById('cust-modal').classList.add('on');
+}
+
+function chargeCustomerWallet(id){
+  const c = adminCustomers.find(x=>x.id===id);
+  if(!c)return;
+  const amt = parseFloat(document.getElementById('cm-charge-amt').value)||0;
+  if(!amt){toast('أدخل المبلغ','err');return;}
+  c.wallet = +(c.wallet+amt).toFixed(2);
+  saveAdminCustomers();
+  renderCustomers();
+  toast('✅ شُحنت محفظة '+c.name+' بـ '+amt,'ok');
+  closeModal('cust-modal');
+}
+
+function deleteCustomerAdmin(id){
+  if(!confirm('حذف الزبون؟'))return;
+  adminCustomers = adminCustomers.filter(x=>x.id!==id);
+  saveAdminCustomers();
+  renderCustomers();
+  toast('🗑️ تم حذف الزبون','err');
+}
+
+function renderCustomers(){
+  const q=(val('cust-q')||'').toLowerCase();
+  // دمج الزبائن المضافين يدوياً مع زبائن الطلبات
+  const fromOrders={};
+  allOrders.forEach(o=>{
+    const ph=o.custPhone||'';
+    if(!fromOrders[ph])fromOrders[ph]={name:o.custName||ph,phone:ph,city:'—',wallet:0,orders:0,last:'—',id:'ord_'+ph};
+    fromOrders[ph].orders++;
+    if(o.dateStr)fromOrders[ph].last=o.dateStr;
+  });
+  // دمج مع القائمة اليدوية
+  const manual = adminCustomers.filter(c=>!q||(c.name.toLowerCase().includes(q)||c.phone.includes(q)));
+  const ordersList = Object.values(fromOrders).filter(c=>!adminCustomers.find(x=>x.phone===c.phone)&&(!q||(c.name.toLowerCase().includes(q)||c.phone.includes(q))));
+  const list = [...manual, ...ordersList];
+  const tb=document.getElementById('custs-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-ic">👤</div></div></td></tr>';return;}
+  tb.innerHTML=list.map(c=>`<tr>
+    <td style="font-weight:600">${c.name||'—'}</td>
+    <td><span class="mono">${c.phone}</span></td>
+    <td>${c.city||'—'}</td>
+    <td><span style="color:var(--gold);font-family:var(--mono)">${(c.wallet||0).toFixed(0)}</span></td>
+    <td>${c.orders||0}</td>
+    <td><span class="mono" style="font-size:10px">${c.last||'—'}</span></td>
+    <td style="display:flex;gap:5px">
+      ${c.id&&!c.id.startsWith('ord_')?`
+      <button class="btn btn-b" style="padding:4px 8px;font-size:11px" onclick="openCustomerModal('${c.id}')">تفاصيل</button>
+      <button class="btn btn-r" style="padding:4px 8px;font-size:11px" onclick="deleteCustomerAdmin('${c.id}')">حذف</button>
+      `:'<span style="color:var(--muted);font-size:11px">من الطلبات</span>'}
+    </td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════
+// WALLET
+// ══════════════════════════════
+function renderWallet(){
+  const done=allOrders.filter(o=>o.status==='done');
+  const comm=done.reduce((s,o)=>s+(o.commission||0),0);
+  const avg=done.length?comm/done.length:0;
+  si('plat-bal',comm.toFixed(0));
+  si('w-total-comm',comm.toFixed(0));
+  si('w-orders-done',done.length);
+  si('w-avg-comm',avg.toFixed(0));
+
+  const el=document.getElementById('comm-list');
+  const commOrders=done.slice(0,15);
+  if(!commOrders.length){el.innerHTML='<div class="empty" style="padding:16px"><div class="empty-ic" style="font-size:28px">💰</div></div>';return;}
+  el.innerHTML=commOrders.map(o=>`
+    <div class="txn">
+      <div class="txn-l"><div class="txn-ic in">💰</div>
+      <div><div class="txn-name">عمولة ${o.id||o.docId}</div><div class="txn-date">${o.dateStr||'—'}</div></div></div>
+      <div class="txn-amt in">+${(o.commission||0).toFixed(0)}</div>
+    </div>`).join('');
+
+  // Tech wallets table
+  const tb=document.getElementById('wallets-tbody');
+  if(!allTechs.length){tb.innerHTML='<tr><td colspan="3"><div class="empty" style="padding:16px">لا يوجد فنيون</div></td></tr>';return;}
+  tb.innerHTML=allTechs.filter(t=>t.status==='active').map(t=>`<tr>
+    <td>${t.name||'—'}</td>
+    <td><span style="color:var(--gold);font-family:var(--mono)">${(t.wallet||0).toFixed(0)}</span></td>
+    <td><span class="tag t-active">نشط</span></td>
+  </tr>`).join('');
+}
+
+async function chargeTechWallet(){
+  const sel=document.getElementById('charge-tech-sel').value;
+  const amt=parseFloat(document.getElementById('charge-amt').value);
+  const note=document.getElementById('charge-note').value.trim();
+  if(!sel||!amt){toast('اختر الفني وأدخل المبلغ','err');return;}
+  const t=allTechs.find(x=>x.docId===sel);if(!t)return;
+  const newWallet=+(( t.wallet||0)+amt).toFixed(2);
+  try{
+    await window._upd('techs',sel,{wallet:newWallet});
+    document.getElementById('charge-amt').value='';
+    document.getElementById('charge-note').value='';
+    toast('✅ شُحنت محفظة '+t.name+' بـ '+amt,'ok');
+  }catch(e){toast('خطأ: '+e.message,'err');}
+}
+
+function populateSelects(){
+  const s=document.getElementById('charge-tech-sel');
+  const v=s.value;
+  s.innerHTML='<option value="">— اختر فني —</option>';
+  allTechs.filter(t=>t.status==='active').forEach(t=>s.innerHTML+=`<option value="${t.docId}">${t.name} (${(t.wallet||0).toFixed(0)})</option>`);
+  if(v)s.value=v;
+
+  const nt=document.getElementById('no-tech');
+  if(nt){
+    const ntv=nt.value;
+    nt.innerHTML='<option value="">— اختر فني —</option>';
+    allTechs.filter(t=>t.status==='active').forEach(t=>nt.innerHTML+=`<option value="${t.docId}">${t.name} — ${SVC[t.service]||t.service}</option>`);
+    if(ntv)nt.value=ntv;
+  }
+}
+
+function filterNoCust(){
+  const q = document.getElementById('no-cust').value.trim().toLowerCase();
+  const dd = document.getElementById('no-cust-dd');
+  if(!q){ dd.style.display='none'; return; }
+
+  // جمع كل الزبائن من المضافين يدوياً + من الطلبات
+  const fromManual = adminCustomers.filter(c=>
+    c.name.toLowerCase().includes(q) || c.phone.includes(q)
+  );
+  const fromOrders = {};
+  allOrders.forEach(o=>{
+    const ph = o.custPhone||'';
+    const nm = o.custName||ph;
+    if((nm.toLowerCase().includes(q)||ph.includes(q)) && !fromOrders[ph])
+      fromOrders[ph] = {name:nm, phone:ph, wallet:0};
+  });
+  const combined = [
+    ...fromManual.map(c=>({name:c.name,phone:c.phone,wallet:c.wallet||0})),
+    ...Object.values(fromOrders).filter(x=>!fromManual.find(m=>m.phone===x.phone))
+  ];
+
+  if(!combined.length){ dd.style.display='none'; return; }
+  dd.innerHTML = combined.map(cu=>`
+    <div onclick="selectNoCust('${cu.name}','${cu.phone}')"
+      style="padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--bd)"
+      onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
+      <div style="font-weight:600">${cu.name}</div>
+      <div style="font-size:11px;color:var(--muted)">${cu.phone} · 💰${(cu.wallet||0).toFixed(0)}</div>
+    </div>`).join('');
+  dd.style.display='block';
+}
+
+function selectNoCust(name, phone){
+  document.getElementById('no-cust').value = name + ' — ' + phone;
+  document.getElementById('no-cust-dd').style.display='none';
+  // حفظ البيانات للاستخدام عند الإنشاء
+  window._selectedCust = {name, phone};
+}
+
+function openNewOrderModal(){
+  const now=new Date();now.setHours(now.getHours()+1);
+  document.getElementById('no-datetime').value=now.toISOString().slice(0,16);
+  document.getElementById('no-cust').value='';
+  window._selectedCust = null;
+  populateSelects();
+  document.getElementById('new-order-modal').classList.add('on');
+}
+
+async function createOrderAdmin(){
+  const custInput = document.getElementById('no-cust').value.trim();
+  const techId  = document.getElementById('no-tech').value;
+  const service = document.getElementById('no-service').value;
+  const pay     = document.getElementById('no-pay').value;
+  const amount  = parseFloat(document.getElementById('no-amount').value)||0;
+  const dt      = document.getElementById('no-datetime').value;
+  const desc    = document.getElementById('no-desc').value.trim();
+
+  if(!custInput){toast('أدخل اسم الزبون أو رقمه','err');return;}
+  if(!service){toast('اختر نوع الخدمة','err');return;}
+
+  // استخدم البيانات المحددة من القائمة أو ما كتبه المدير
+  const selCust = window._selectedCust;
+  const custName = selCust ? selCust.name : custInput;
+  const custPhone = selCust ? selCust.phone : custInput;
+
+  const tech = techId ? allTechs.find(x=>x.docId===techId) : null;
+  const commission = +(amount*0.1).toFixed(2);
+  const id='ORD-'+String(Math.floor(Math.random()*99999)).padStart(5,'0');
+  const now=new Date();
+
+  const order={
+    id,
+    custPhone, custName,
+    techId: techId||'',
+    techName: tech?.name||'غير معيّن',
+    service,
+    serviceLabel: SVC[service]||service,
+    pay, amount, commission,
+    desc: desc||'—',
+    status: 'pending',
+    dateISO: dt?.slice(0,10)||now.toISOString().slice(0,10),
+    dateStr: now.toLocaleDateString('ar-SA'),
+    datetime: dt||now.toISOString().slice(0,16),
+    ts: Date.now()
+  };
+
+  try{
+    if(window._fbReady) await window._addDoc(window._col('orders'), order);
+    closeModal('new-order-modal');
+    ['no-cust','no-amount','no-desc'].forEach(id=>document.getElementById(id).value='');
+    window._selectedCust = null;
+    toast('✅ تم إنشاء الطلب '+id+' — سيظهر للفني فوراً','ok');
+    go('orders',null);
+  }catch(e){toast('خطأ: '+e.message,'err');}
+}
+
+// ══════════════════════════════
+// MAP
+// ══════════════════════════════
+let adminMap=null, mapMarkers=[];
+function initAdminMap(){
+  if(adminMap)return;
+  adminMap=L.map('admin-map').setView([33.3152,44.3661],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(adminMap);
+  setTimeout(()=>adminMap.invalidateSize(),300);
+}
+function updateMapMarkers(){
+  if(!adminMap)return;
+  mapMarkers.forEach(m=>adminMap.removeLayer(m));
+  mapMarkers=[];
+  allOrders.filter(o=>o.lat).forEach(o=>{
+    const color=o.status==='done'?'#10b981':o.status==='inprogress'?'#3b82f6':'#f0a500';
+    const m=L.marker([o.lat,o.lng],{icon:L.divIcon({className:'',html:`<div style="width:12px;height:12px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>`,iconSize:[12,12],iconAnchor:[6,6]})});
+    m.addTo(adminMap).bindPopup(`<b>${SVC[o.service]||o.service}</b><br>${o.custPhone||'—'}<br>${stTag(o.status)}`);
+    mapMarkers.push(m);
+  });
+}
+
+// ══════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════
+function renderNotifs(){
+  const unread=notifications.filter(n=>!n.read).length;
+  si('nb-notifs',unread);
+  document.getElementById('nb-notifs').style.display=unread?'flex':'none';
+  const el=document.getElementById('notifs-list');
+  if(!notifications.length){el.innerHTML='<div class="empty"><div class="empty-ic">🔔</div><div style="font-size:13px">لا توجد إشعارات</div></div>';return;}
+  el.innerHTML=notifications.map((n,i)=>`
+    <div class="notif-card ${n.read?'':'unread'}" onclick="markRead(${i})">
+      <div class="notif-ic">${n.type==='tech'?'👷':n.type==='order'?'📋':'✅'}</div>
+      <div style="flex:1"><div class="notif-title">${n.title}</div><div class="notif-sub">${n.sub}</div><div class="notif-time">${n.time}</div></div>
+    </div>`).join('');
+}
+function markRead(i){notifications[i].read=true;renderNotifs();}
+function markAllRead(){notifications.forEach(n=>n.read=true);renderNotifs();}
+
+// ══════════════════════════════
+// NAV
+// ══════════════════════════════
+const pgNames={dash:'لوحة التحكم',orders:'الطلبات',map:'الخريطة الحية','pending-techs':'طلبات التسجيل',techs:'الفنيون النشطون',wallet:'المحفظة',customers:'الزبائن','add-customer':'إضافة زبون',notifs:'الإشعارات'};
+function go(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('p-'+page)?.classList.add('on');
+  if(el)el.classList.add('on');
+  document.getElementById('pname').textContent='/ '+(pgNames[page]||page);
+  if(page==='map')setTimeout(()=>adminMap?.invalidateSize(),200);
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+function si(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function val(id){return document.getElementById(id)?.value||'';}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+function toast(msg,type){
+  const el=document.createElement('div');
+  el.className='toast '+(type==='ok'?'ok':type==='err'?'err':'');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+// ══════════════════════════════
+// DATE
+// ══════════════════════════════
+document.addEventListener('click',e=>{
+  const dd=document.getElementById('no-cust-dd');
+  if(dd&&!e.target.closest('#no-cust')&&!e.target.closest('#no-cust-dd')) dd.style.display='none';
+});
+document.getElementById('top-date').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'short',year:'numeric',month:'long',day:'numeric'});
+
+// ══════════════════════════════
+// BOOT — ينتظر Firebase يتهيأ
+// ══════════════════════════════
+let bootTries = 0;
+function bootApp(){
+  bootTries++;
+  if(window._authState){
+    window._authState(user=>{
+      if(user){
+        adminUser=user;
+        document.getElementById('auth-screen').style.display='none';
+        document.getElementById('main-app').style.display='grid';
+        initListeners();
+        toast('✅ مرحباً بك في لوحة التحكم','ok');
+      } else {
+        document.getElementById('auth-screen').style.display='flex';
+        document.getElementById('main-app').style.display='none';
+        document.getElementById('login-btn').textContent='دخول';
+        document.getElementById('login-btn').disabled=false;
+      }
+    });
+  } else if(bootTries < 20){
+    setTimeout(bootApp, 300);
+  } else {
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('main-app').style.display='none';
+    authErr('تعذر الاتصال بـ Firebase — تحقق من الإنترنت');
+  }
+}
+window.addEventListener('load', ()=> setTimeout(bootApp, 500));
+</script>
+</body>
+</html>
