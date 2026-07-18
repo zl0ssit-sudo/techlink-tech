@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TechLink — تطبيق الفني</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
+var DB, AUTH, STORAGE, FB_READY = false;
+// أظهر splash فوراً
+document.addEventListener('DOMContentLoaded', function(){
+  showScreen('splash');
+});
+window.addEventListener('load', function(){
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyCqJokUc0LbG4387K0uLSe2i_anBSsG-dM",
+        authDomain: "command-fix.firebaseapp.com",
+        projectId: "command-fix",
+        storageBucket: "command-fix.firebasestorage.app",
+        messagingSenderId: "218796531794",
+        appId: "1:218796531794:web:751ff2fa49e216cb023f8b"
+      });
+    }
+    DB = firebase.firestore();
+    AUTH = firebase.auth();
+    STORAGE = firebase.storage();
+    FB_READY = true;
+    console.log('Firebase Tech OK');
+  } catch(e) { console.error('Firebase:', e); }
+});
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Cairo',sans-serif;background:#07090f;color:#e8edf5;min-height:100vh;overflow-x:hidden}
+:root{
+  --gold:#f0a500;--gold2:#e8870a;--bg:#07090f;--s1:#0d1320;--s2:#111827;
+  --s3:#1a2235;--bd:#1e2d45;--green:#10b981;--red:#ef4444;--blue:#3b82f6;
+  --orange:#f97316;--purple:#8b5cf6;--muted:#5a7090;
+}
+.screen{display:none!important;min-height:100vh}
+.screen.on{display:block!important}
+
+/* SPLASH */
+#splash{background:var(--bg);display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.sp-logo{width:90px;height:90px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 0 40px rgba(240,165,0,.3)}
+.sp-title{font-size:32px;font-weight:900}.sp-title span{color:var(--gold)}
+.sp-sub{font-size:14px;color:var(--muted)}
+.sp-loader{width:40px;height:40px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-top:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AUTH */
+#auth{background:var(--bg);display:flex!important;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:28px;width:100%;max-width:380px}
+.auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+.auth-logo-ic{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.auth-logo-txt{font-size:20px;font-weight:900}.auth-logo-txt span{color:var(--gold)}
+.auth-sub-txt{text-align:center;font-size:12px;color:var(--muted);margin-bottom:18px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--s2);border-radius:10px;padding:3px;margin-bottom:18px}
+.auth-tab{padding:8px;text-align:center;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;color:var(--muted);transition:all .2s}
+.auth-tab.on{background:var(--s1);color:#e8edf5;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;color:#e8edf5;font-family:'Cairo',sans-serif;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.inp:focus{border-color:var(--gold)}
+.inp-row{display:flex;gap:0;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.inp-code{padding:11px 12px;font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap;border-left:1px solid var(--bd)}
+.inp-phone{flex:1;background:none;border:none;padding:11px 14px;color:#e8edf5;font-family:'Cairo',sans-serif;font-size:14px;outline:none;direction:ltr;text-align:right}
+.otp-row{display:flex;gap:8px;justify-content:center;direction:ltr;margin-bottom:14px}
+.otp-inp{width:44px;height:50px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;text-align:center;font-size:20px;font-weight:700;color:#e8edf5;outline:none;font-family:'Cairo',sans-serif;transition:border-color .2s}
+.otp-inp:focus{border-color:var(--gold)}
+.btn-main{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:#07090f;font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.btn-main:disabled{opacity:.5}.btn-main:active{opacity:.8}
+.auth-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+
+/* PENDING */
+#pending{background:var(--bg);display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:30px;gap:16px;text-align:center}
+.pend-ic{font-size:64px}
+.pend-title{font-size:20px;font-weight:800}
+.pend-sub{font-size:14px;color:var(--muted);line-height:1.6}
+.btn-outline{width:100%;max-width:300px;padding:12px;background:none;border:1px solid var(--bd);border-radius:12px;color:#e8edf5;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* APP */
+#app{background:var(--bg);padding-bottom:70px}
+.topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.online-toggle{display:flex;align-items:center;gap:8px;cursor:pointer}
+.online-dot{width:10px;height:10px;border-radius:50%;background:var(--red);transition:background .3s}
+.online-dot.on{background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.online-txt{font-size:13px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tech-name-sm{font-size:12px;color:var(--muted)}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#07090f}
+
+/* TABS */
+.tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--bd);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 16px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* PAGE */
+.page{display:none;padding:14px}
+.page.on{display:block}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.stat-val{font-size:24px;font-weight:900;margin-bottom:3px}
+.stat-lbl{font-size:11px;color:var(--muted)}
+.stat-val.gold{color:var(--gold)}.stat-val.green{color:var(--green)}.stat-val.blue{color:var(--blue)}
+
+/* ORDER CARDS */
+.order-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.order-card.incoming{border-color:var(--gold);animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(240,165,0,0)}50%{box-shadow:0 0 16px rgba(240,165,0,.2)}}
+.oc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.oc-id{font-size:11px;color:var(--muted);font-family:monospace}
+.oc-svc{font-size:16px;font-weight:800;margin-bottom:4px}
+.oc-type{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:6px}
+.type-now{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.type-book{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.oc-info{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;flex-direction:column;gap:3px}
+.oc-btns{display:flex;gap:8px;margin-top:8px}
+.oc-btn{flex:1;padding:9px;border-radius:10px;border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.oc-btn-accept{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
+.oc-btn-reject{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)!important}
+.oc-btn-call{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)!important}
+.oc-btn-done{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090f}
+.oc-btn-nav{background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)!important}
+
+/* TAG */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.tag-pending{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.25)}
+.tag-prog{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.tag-done{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.tag-cancel{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.tdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ic{font-size:48px;opacity:.3;margin-bottom:8px}
+
+/* MAP */
+.map-full{height:calc(100vh - 140px);border-radius:14px;overflow:hidden;border:1px solid var(--bd)}
+#nav-map{height:100%}
+
+/* WALLET */
+.wallet-card{background:linear-gradient(135deg,rgba(240,165,0,.15),rgba(240,165,0,.05));border:1px solid rgba(240,165,0,.25);border-radius:14px;padding:18px;margin-bottom:12px}
+.wc-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.wc-amount{font-size:36px;font-weight:900;color:var(--gold)}
+.txn-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.txn-item:last-child{border:none}
+.txn-label{font-size:13px}
+.txn-amount{font-size:14px;font-weight:700}
+.txn-out{color:var(--red)}.txn-in{color:var(--green)}
+
+/* PROFILE */
+.prof-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:12px;text-align:center}
+.prof-av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#07090f;margin:0 auto 10px}
+.prof-name{font-size:18px;font-weight:800}
+.prof-spec{font-size:13px;color:var(--gold);margin-top:3px}
+.prof-phone{font-size:13px;color:var(--muted);margin-top:2px}
+.logout-btn{width:100%;padding:13px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:12px;color:var(--red);font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
+
+/* CHAT */
+.chat-box{height:280px;overflow-y:auto;background:var(--s2);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg-me{background:var(--gold);color:#07090f;align-self:flex-end;border-radius:12px 12px 3px 12px}
+.msg-other{background:var(--s1);border:1px solid var(--bd);align-self:flex-start;border-radius:12px 12px 12px 3px}
+.msg-time{font-size:10px;opacity:.6;margin-top:2px}
+.chat-inp-row{display:flex;gap:8px}
+.chat-inp{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px;color:#e8edf5;font-family:'Cairo',sans-serif;font-size:14px;outline:none}
+.chat-send{background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;padding:10px 14px;color:#07090f;font-size:18px;cursor:pointer}
+
+/* TOAST */
+#toasts{position:fixed;bottom:80px;left:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--s1);border:1px solid var(--bd);border-right:3px solid var(--gold);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:tIn .25s ease}
+.toast.ok{border-right-color:var(--green)}.toast.err{border-right-color:var(--red)}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(5,1fr);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;padding:8px 0;cursor:pointer;color:var(--muted);font-size:9px;font-weight:700;gap:2px;transition:color .2s}
+.bnav-btn.on{color:var(--gold)}
+.bnav-ic{font-size:20px;line-height:1}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen" id="splash" style="display:none">
+  <div class="sp-logo">🔧</div>
+  <div class="sp-title">Tech<span>Link</span></div>
+  <div class="sp-sub">بوابة الفنيين المحترفين</div>
+  <div class="sp-loader"></div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="auth">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-ic">🔧</div>
+      <div class="auth-logo-txt">Tech<span>Link</span> <span style="color:var(--muted);font-size:14px">فني</span></div>
+    </div>
+    <div class="auth-sub-txt">بوابة الفنيين المحترفين</div>
+    <div class="auth-tabs">
+      <div class="auth-tab on" id="tab-login" onclick="authTab('login')">تسجيل الدخول</div>
+      <div class="auth-tab" id="tab-reg" onclick="authTab('reg')">حساب جديد</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="lbl">رقم الجوال</div>
+      <div class="inp-row">
+        <div class="inp-code">🇮🇶 +964</div>
+        <input class="inp-phone" id="l-phone" type="tel" placeholder="07xxxxxxxxx" maxlength="11">
+      </div>
+      <button class="btn-main" id="l-send-btn" onclick="loginSend()">إرسال رمز التحقق</button>
+      <div id="l-otp-section" style="display:none;margin-top:14px">
+        <div class="lbl">رمز التحقق (123456)</div>
+        <div class="otp-row">
+          <input class="otp-inp" id="o1" maxlength="1" oninput="om(this,'o2')" onclick="this.select()">
+          <input class="otp-inp" id="o2" maxlength="1" oninput="om(this,'o3')" onclick="this.select()">
+          <input class="otp-inp" id="o3" maxlength="1" oninput="om(this,'o4')" onclick="this.select()">
+          <input class="otp-inp" id="o4" maxlength="1" oninput="om(this,'o5')" onclick="this.select()">
+          <input class="otp-inp" id="o5" maxlength="1" oninput="om(this,'o6')" onclick="this.select()">
+          <input class="otp-inp" id="o6" maxlength="1" oninput="otpDone()" onclick="this.select()">
+        </div>
+        <button class="btn-main" onclick="loginVerify()">دخول</button>
+      </div>
+      <div class="auth-err" id="l-err"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-reg" style="display:none">
+      <div class="lbl">الاسم الكامل</div>
+      <input class="inp" id="r-name" placeholder="اسمك الكامل">
+      <div class="lbl">رقم الجوال</div>
+      <div class="inp-row">
+        <div class="inp-code">🇮🇶 +964</div>
+        <input class="inp-phone" id="r-phone" type="tel" placeholder="07xxxxxxxxx" maxlength="11">
+      </div>
+      <div class="lbl">التخصص</div>
+      <select class="inp" id="r-spec" style="cursor:pointer">
+        <option value="electric">⚡ كهرباء</option>
+        <option value="plumb">🔧 سباكة</option>
+        <option value="ac">❄️ تكييف</option>
+        <option value="paint">🎨 دهان</option>
+        <option value="carp">🪚 نجارة</option>
+        <option value="clean">🧹 تنظيف</option>
+        <option value="tile">🪟 بلاط</option>
+        <option value="other">🔨 متعدد</option>
+      </select>
+      <div class="lbl">المدينة</div>
+      <input class="inp" id="r-city" placeholder="بغداد">
+      <div class="lbl">سعر الكشفية (د.ع)</div>
+      <input class="inp" id="r-price" type="number" placeholder="مثال: 15000">
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px">السعر الذي سيظهر للزبون عند طلب خدمتك</div>
+      <button class="btn-main" onclick="register()">طلب تسجيل</button>
+      <div class="auth-err" id="r-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div class="screen" id="pending">
+  <div class="pend-ic">⏳</div>
+  <div class="pend-title">طلبك قيد المراجعة</div>
+  <div class="pend-sub">تم إرسال طلب تسجيلك للإدارة.<br>ستحصل على إشعار عند التفعيل.</div>
+  <button class="btn-outline" onclick="checkActivation()">🔄 تحقق من حالة حسابي</button>
+  <button class="btn-outline" style="margin-top:8px;border-color:var(--red);color:var(--red)" onclick="logout()">تسجيل الخروج</button>
+</div>
+
+<!-- APP -->
+<div class="screen" id="app">
+  <div class="topbar">
+    <div class="online-toggle" onclick="toggleOnline()">
+      <div class="online-dot" id="online-dot"></div>
+      <div class="online-txt" id="online-txt">غير متاح</div>
+    </div>
+    <div class="topbar-right">
+      <div class="tech-name-sm" id="tech-name-sm">—</div>
+      <div class="avatar" id="tech-av">ف</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="goTab('home')">🏠 الرئيسية</div>
+    <div class="tab" onclick="goTab('history')">📋 السجل</div>
+    <div class="tab" onclick="goTab('map')">🗺️ الملاحة</div>
+    <div class="tab" onclick="goTab('wallet')">💰 المحفظة</div>
+    <div class="tab" onclick="goTab('profile')">👤 حسابي</div>
+    <div class="tab" onclick="goTab('notifs')">🔔 <span id="notif-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px">0</span></div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page on" id="pg-home">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val blue" id="st-orders">0</div><div class="stat-lbl">الطلبات المكتملة</div></div>
+      <div class="stat-card"><div class="stat-val gold" id="st-wallet">0</div><div class="stat-lbl">رصيد المحفظة (د.ع)</div></div>
+    </div>
+    <button class="btn-main" style="margin-bottom:14px" onclick="openNewOrderModal()">+ إنشاء طلب لزبون</button>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">الطلبات الواردة</div>
+    <div id="incoming-list"><div class="empty"><div class="empty-ic">📭</div><div>فعّل "متاح" لاستقبال الطلبات</div></div></div>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 10px">طلباتي الحالية</div>
+    <div id="active-list"><div class="empty"><div class="empty-ic">🔧</div><div>لا توجد طلبات نشطة</div></div></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="pg-history">
+    <div id="history-list"><div class="empty"><div class="empty-ic">📋</div><div>لا يوجد سجل بعد</div></div></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="page" id="pg-map">
+    <div class="map-full"><div id="nav-map"></div></div>
+  </div>
+
+  <!-- WALLET -->
+  <div class="page" id="pg-wallet">
+    <div class="wallet-card">
+      <div class="wc-label">رصيد المحفظة</div>
+      <div class="wc-amount" id="w-balance">0</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">دينار عراقي</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">سجل المعاملات</div>
+    <div id="txn-list"><div class="empty"><div class="empty-ic">💳</div><div>لا توجد معاملات بعد</div></div></div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page" id="pg-notifs">
+    <div id="notifs-list"><div class="empty"><div class="empty-ic">🔔</div><div>لا توجد إشعارات</div></div></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page" id="pg-profile">
+    <div class="prof-card">
+      <div class="prof-av" id="prof-av">ف</div>
+      <div class="prof-name" id="prof-name">—</div>
+      <div class="prof-spec" id="prof-spec">—</div>
+      <div class="prof-phone" id="prof-phone">—</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+  </div>
+</div>
+
+<!-- NEW ORDER MODAL -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-end;justify-content:center" id="new-order-modal" onclick="if(event.target===this)closeNewOrderModal()">
+  <div style="background:var(--s1);border:1px solid var(--bd);border-radius:20px 20px 0 0;padding:18px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-size:15px;font-weight:800">طلب جديد لزبون</span>
+      <button onclick="closeNewOrderModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+
+    <div class="lbl">اسم الزبون</div>
+    <input class="inp" id="no-cust-name" placeholder="اسم الزبون">
+    <div class="lbl">رقم جوال الزبون</div>
+    <input class="inp" id="no-cust-phone" placeholder="07xxxxxxxxx">
+
+    <div class="lbl">📍 موقع الزبون</div>
+    <input class="inp" id="no-loc-search" placeholder="ابحث عن منطقة أو عنوان..." oninput="searchNoLocation(this.value)" autocomplete="off">
+    <div id="no-loc-dd" style="display:none;background:var(--s2);border:1px solid var(--bd);border-radius:8px;max-height:160px;overflow-y:auto;margin-bottom:8px"></div>
+    <div style="border-radius:10px;border:1px solid var(--bd);height:180px;margin-bottom:8px;overflow:hidden">
+      <div id="no-order-map" style="height:100%;width:100%"></div>
+    </div>
+    <button class="btn-outline" style="margin-bottom:12px" onclick="useMyLocationForOrder()">📍 استخدم موقعي الحالي</button>
+    <div id="no-loc-status" style="font-size:11px;color:var(--muted);margin-bottom:12px">اضغط على الخريطة أو ابحث لتحديد الموقع</div>
+
+    <div class="lbl">نوع الخدمة</div>
+    <select class="inp" id="no-service">
+      <option value="electric">⚡ كهرباء</option>
+      <option value="plumb">🔧 سباكة</option>
+      <option value="ac">❄️ تكييف</option>
+      <option value="paint">🎨 دهان</option>
+      <option value="carp">🪚 نجارة</option>
+      <option value="clean">🧹 تنظيف</option>
+      <option value="tile">🪟 بلاط</option>
+      <option value="other">🔨 أخرى</option>
+    </select>
+
+    <div class="lbl">القيمة (د.ع)</div>
+    <input class="inp" id="no-amount" type="number" placeholder="0">
+
+    <div class="lbl">ملاحظات</div>
+    <input class="inp" id="no-desc" placeholder="تفاصيل الطلب...">
+
+    <button class="btn-main" onclick="createTechOrder()">إنشاء الطلب وقبوله</button>
+  </div>
+</div>
+
+<!-- CHAT MODAL -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-end;justify-content:center" id="chat-modal" onclick="if(event.target===this)closeChat()">
+  <div style="background:var(--s1);border:1px solid var(--bd);border-radius:20px 20px 0 0;padding:18px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:15px;font-weight:800">💬 المحادثة مع الزبون</span>
+      <button onclick="closeChat()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="chat-box" id="tech-chat-messages">
+      <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">ابدأ المحادثة مع الزبون</div>
+    </div>
+    <div class="chat-inp-row">
+      <input class="chat-inp" id="tech-chat-inp" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendTechMsg()">
+      <button class="chat-send" onclick="sendTechMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="recaptcha-box"></div>
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+var DEMO = true;
+var techData = null;
+var currentPhone = '';
+var isOnline = false;
+var ordersUnsub = null, activeUnsub = null, historyUnsub = null;
+var navMap = null, navRoute = null;
+var activeOrderId = null;
+
+var SVC = {electric:'⚡ كهرباء',plumb:'🔧 سباكة',ac:'❄️ تكييف',paint:'🎨 دهان',carp:'🪚 نجارة',clean:'🧹 تنظيف',tile:'🪟 بلاط',other:'🔨 متعدد'};
+
+// ══════════════════════════════════════
+// SPLASH → AUTH (بعد 2.5 ثانية)
+// ══════════════════════════════════════
+setTimeout(function(){
+  // تحقق من جلسة محفوظة
+  var saved = localStorage.getItem('tl_tech_session');
+  if(saved){
+    try{
+      techData = JSON.parse(saved);
+      currentPhone = techData.phone||'';
+      if(techData.status==='active'){
+        showScreen('app');
+        initApp();
+        return;
+      } else if(techData.status==='pending'){
+        showScreen('pending');
+        return;
+      }
+    }catch(e){}
+  }
+  showScreen('auth');
+}, 2500);
+
+function showScreen(id){
+  // أخفِ كل الشاشات بشكل قاطع
+  var screens=['splash','auth','pending','app'];
+  screens.forEach(function(sid){
+    var s=document.getElementById(sid);
+    if(s){
+      s.style.cssText='display:none!important';
+      s.classList.remove('on');
+    }
+  });
+  // أظهر الشاشة المطلوبة فقط
+  var el=document.getElementById(id);
+  if(el){
+    el.style.cssText='display:block!important';
+    if(id==='app') el.style.cssText='display:block!important;min-height:100vh';
+    el.classList.add('on');
+  }
+}
+
+// ══════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════
+function authTab(tab){
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-reg').style.display=tab==='reg'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('on',tab==='login');
+  document.getElementById('tab-reg').classList.toggle('on',tab==='reg');
+}
+
+function loginSend(){
+  var ph=document.getElementById('l-phone').value.trim();
+  if(!ph||ph.length<10){showErr('l-err','أدخل رقم الجوال كاملاً');return;}
+  currentPhone='+964'+(ph.startsWith('0')?ph.slice(1):ph);
+  document.getElementById('l-send-btn').style.display='none';
+  document.getElementById('l-otp-section').style.display='block';
+  document.getElementById('o1').focus();
+  toast('رمز التحقق التجريبي: 123456','ok');
+}
+
+function om(el,next){if(el.value.length===1)document.getElementById(next)?.focus();}
+function otpDone(){setTimeout(loginVerify,100);}
+
+function loginVerify(){
+  var code=['o1','o2','o3','o4','o5','o6'].map(function(id){return document.getElementById(id).value;}).join('');
+  if(code.length<6){showErr('l-err','أدخل الرمز كاملاً');return;}
+  if(DEMO&&code!=='123456'){
+    showErr('l-err','الرمز غير صحيح — استخدم 123456');
+    ['o1','o2','o3','o4','o5','o6'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('o1').focus();
+    return;
+  }
+  // ابحث عن الفني في Firebase
+  searchTechByPhone(currentPhone);
+}
+
+function searchTechByPhone(phone){
+  toast('🔍 جاري البحث...','');
+  if(!FB_READY){showErr('l-err','لا يوجد اتصال بالإنترنت');return;}
+  
+  DB.collection('techs').where('phone','==',phone).get().then(function(snap){
+    if(!snap.empty){
+      var doc=snap.docs[0];
+      techData=Object.assign({docId:doc.id},doc.data());
+      localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+      handleTechStatus();
+    } else {
+      // جرب بدون كود الدولة
+      var phone2='0'+phone.slice(4);
+      DB.collection('techs').where('phone','==',phone2).get().then(function(snap2){
+        if(!snap2.empty){
+          var doc2=snap2.docs[0];
+          techData=Object.assign({docId:doc2.id},snap2.docs[0].data());
+          localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+          handleTechStatus();
+        } else {
+          showErr('l-err','رقمك غير مسجل كفني — سجّل حساباً جديداً');
+          authTab('reg');
+        }
+      });
+    }
+  }).catch(function(e){showErr('l-err','خطأ في الاتصال: '+e.message);});
+}
+
+function handleTechStatus(){
+  if(techData.status==='active'){
+    showScreen('app');
+    initApp();
+  } else if(techData.status==='blocked'){
+    showErr('l-err','حسابك موقوف — تواصل مع الإدارة');
+  } else {
+    showScreen('pending');
+  }
+}
+
+function register(){
+  var name=document.getElementById('r-name').value.trim();
+  var ph=document.getElementById('r-phone').value.trim();
+  var spec=document.getElementById('r-spec').value;
+  var city=document.getElementById('r-city').value.trim()||'بغداد';
+  if(!name){showErr('r-err','أدخل اسمك');return;}
+  if(!ph||ph.length<10){showErr('r-err','أدخل رقم الجوال كاملاً');return;}
+  if(!FB_READY){showErr('r-err','لا يوجد اتصال بالإنترنت');return;}
+  
+  var phone='+964'+(ph.startsWith('0')?ph.slice(1):ph);
+  var price=parseFloat(document.getElementById('r-price').value)||0;
+  var data={
+    name:name,phone:phone,service:spec,spec:spec,city:city,
+    price:price,
+    wallet:0,ordersCount:0,status:'pending',
+    createdAt:new Date().toISOString()
+  };
+  DB.collection('techs').add(data).then(function(ref){
+    data.docId=ref.id;
+    techData=data;
+    localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+    showScreen('pending');
+    toast('✅ تم إرسال طلب تسجيلك!','ok');
+  }).catch(function(e){showErr('r-err','خطأ: '+e.message);});
+}
+
+function checkActivation(){
+  if(!techData||!techData.docId){showScreen('auth');return;}
+  DB.collection('techs').doc(techData.docId).get().then(function(snap){
+    if(snap.exists){
+      techData=Object.assign({docId:snap.id},snap.data());
+      localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+      if(techData.status==='active'){
+        showScreen('app');
+        initApp();
+        toast('✅ تم تفعيل حسابك!','ok');
+      } else {
+        toast('لا يزال قيد المراجعة','');
+      }
+    }
+  });
+}
+
+function showErr(id,msg){document.getElementById(id).textContent=msg;}
+
+// ══════════════════════════════════════
+// APP
+// ══════════════════════════════════════
+var COMMISSION_RATE = 0.10; // 10% افتراضي
+
+function loadSystemSettings(){
+  if(!FB_READY) return;
+  DB.collection('settings').doc('config').get().then(function(snap){
+    if(snap.exists){
+      var data = snap.data();
+      if(data.commission) COMMISSION_RATE = data.commission / 100;
+    }
+  }).catch(function(){});
+}
+
+function initApp(){
+  loadSystemSettings();
+  var ini=(techData.name||'ف').charAt(0);
+  document.getElementById('tech-av').textContent=ini;
+  document.getElementById('tech-name-sm').textContent=techData.name||'';
+  document.getElementById('prof-av').textContent=ini;
+  document.getElementById('prof-name').textContent=techData.name||'—';
+  document.getElementById('prof-spec').textContent=SVC[techData.service||techData.spec]||'—';
+  document.getElementById('prof-phone').textContent=techData.phone||'—';
+  document.getElementById('st-wallet').textContent=(techData.wallet||0).toLocaleString('ar-IQ');
+  document.getElementById('w-balance').textContent=(techData.wallet||0).toLocaleString('ar-IQ');
+
+  // تفعيل وضع متاح تلقائياً
+  toggleOnline(true);
+
+  // استمع للطلبات
+  listenOrders();
+  loadTechNotifs();
+}
+
+// ══════════════════════════════════════
+// ONLINE TOGGLE
+// ══════════════════════════════════════
+function toggleOnline(forceOn){
+  if(forceOn===true) isOnline=true;
+  else isOnline=!isOnline;
+  
+  document.getElementById('online-dot').classList.toggle('on',isOnline);
+  document.getElementById('online-txt').textContent=isOnline?'متاح':'غير متاح';
+  
+  if(isOnline){
+    listenOrders();
+    toast('🟢 أنت متاح الآن لاستقبال الطلبات','ok');
+  } else {
+    if(ordersUnsub){ordersUnsub();ordersUnsub=null;}
+    renderIncoming([]);
+    toast('🔴 أنت غير متاح','');
+  }
+}
+
+// ══════════════════════════════════════
+// LISTEN ORDERS
+// ══════════════════════════════════════
+function listenOrders(){
+  if(!FB_READY||!isOnline) return;
+  if(ordersUnsub){ordersUnsub();ordersUnsub=null;}
+
+  // استمع للطلبات المعلقة
+  ordersUnsub = DB.collection('orders')
+    .where('status','==','pending')
+    .onSnapshot(function(snap){
+      var orders=snap.docs.map(function(d){return Object.assign({docId:d.id},d.data());});
+      renderIncoming(orders);
+    }, function(err){
+      console.error('Orders listen error:',err);
+      // fallback
+      DB.collection('orders').get().then(function(snap){
+        var orders=snap.docs.map(function(d){return Object.assign({docId:d.id},d.data());}).filter(function(o){return o.status==='pending';});
+        renderIncoming(orders);
+      });
+    });
+
+  // استمع للطلبات النشطة
+  if(activeUnsub){activeUnsub();activeUnsub=null;}
+  activeUnsub = DB.collection('orders')
+    .where('techDocId','==',techData.docId)
+    .where('status','in',['inprogress','accepted'])
+    .onSnapshot(function(snap){
+      var active=snap.docs.map(function(d){return Object.assign({docId:d.id},d.data());});
+      renderActive(active);
+    }, function(){});
+
+  // استمع للسجل
+  if(historyUnsub){historyUnsub();historyUnsub=null;}
+  historyUnsub = DB.collection('orders')
+    .where('techDocId','==',techData.docId)
+    .onSnapshot(function(snap){
+      var all=snap.docs.map(function(d){return Object.assign({docId:d.id},d.data());});
+      var done=all.filter(function(o){return o.status==='done'||o.status==='cancelled';});
+      renderHistory(done);
+      var count=all.filter(function(o){return o.status==='done';}).length;
+      document.getElementById('st-orders').textContent=count;
+    }, function(){});
+}
+
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function renderIncoming(orders){
+  var el=document.getElementById('incoming-list');
+  if(!el) return;
+  if(!orders.length){
+    el.innerHTML='<div class="empty"><div class="empty-ic">📭</div><div>لا توجد طلبات جديدة</div></div>';
+    return;
+  }
+  // رنين
+  playSound();
+  el.innerHTML=orders.map(function(o){
+    var isBook=o.type==='book';
+    return '<div class="order-card incoming">'+
+      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag tag-pending"><span class="tdot"></span>انتظار</span></div>'+
+      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||o.service||'—')+'</div>'+
+      '<span class="oc-type '+(isBook?'type-book':'type-now')+'">'+(isBook?'📅 حجز مسبق':'⚡ طلب آني')+'</span>'+
+      '<div class="oc-info">'+
+      '<span>👤 '+(o.custName||o.custPhone||'—')+'</span>'+
+      '<span>💵 الدفع: '+(o.pay==='wallet'?'محفظة':'نقداً')+'</span>'+
+      (isBook?'<span>📅 موعد: '+o.datetime?.replace('T',' ')+'</span>':'')+
+      (o.desc&&o.desc!=='—'?'<span>📝 '+o.desc+'</span>':'')+
+      '</div>'+
+      '<div class="oc-btns">'+
+      '<button class="oc-btn oc-btn-accept" onclick="acceptOrder(\''+o.docId+'\',\''+o.custPhone+'\','+(o.lat||0)+','+(o.lng||0)+')">✅ قبول</button>'+
+      '<button class="oc-btn oc-btn-reject" onclick="rejectOrder(\''+o.docId+'\')">✕ رفض</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderActive(orders){
+  var el=document.getElementById('active-list');
+  if(!el) return;
+  if(!orders.length){
+    el.innerHTML='<div class="empty"><div class="empty-ic">🔧</div><div>لا توجد طلبات نشطة</div></div>';
+    return;
+  }
+  el.innerHTML=orders.map(function(o){
+    return '<div class="order-card">'+
+      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag tag-prog"><span class="tdot"></span>جارٍ</span></div>'+
+      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||'—')+'</div>'+
+      '<div class="oc-info"><span>👤 '+(o.custName||o.custPhone||'—')+'</span></div>'+
+      '<div class="oc-btns">'+
+      (o.lat?'<button class="oc-btn oc-btn-nav" onclick="startNav('+o.lat+','+o.lng+')">🗺️ ملاحة</button>':'')+
+      (o.custPhone?'<a class="oc-btn oc-btn-call" href="tel:'+o.custPhone+'">📞</a>':'')+
+      '<button class="oc-btn oc-btn-done" onclick="completeOrder(\''+o.docId+'\',' +(o.amount||0)+')">✅ إتمام</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderHistory(orders){
+  var el=document.getElementById('history-list');
+  if(!el) return;
+  if(!orders.length){
+    el.innerHTML='<div class="empty"><div class="empty-ic">📋</div><div>لا يوجد سجل بعد</div></div>';
+    return;
+  }
+  var tagMap={done:'tag-done',cancelled:'tag-cancel'};
+  var lblMap={done:'مكتمل',cancelled:'ملغي'};
+  el.innerHTML=orders.slice(0,30).map(function(o){
+    return '<div class="order-card">'+
+      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag '+(tagMap[o.status]||'')+'">'+(lblMap[o.status]||o.status)+'</span></div>'+
+      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||'—')+'</div>'+
+      '<div class="oc-info">'+
+      '<span>👤 '+(o.custName||o.custPhone||'—')+'</span>'+
+      (o.commission?'<span>💰 عمولة: '+o.commission.toLocaleString('ar-IQ')+' د.ع</span>':'')+
+      '<span>📅 '+( o.dateStr||''  )+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// ORDER ACTIONS
+// ══════════════════════════════════════
+function acceptOrder(docId,custPhone,lat,lng){
+  if(!FB_READY){toast('لا يوجد اتصال','err');return;}
+  DB.collection('orders').doc(docId).update({
+    status:'inprogress',
+    techDocId: techData.docId,
+    techName: techData.name,
+    techPhone: techData.phone,
+    acceptedAt: new Date().toISOString()
+  }).then(function(){
+    activeOrderId=docId;
+    toast('✅ قبلت الطلب — في طريقك للزبون','ok');
+    if(lat&&lng){ startNav(lat,lng); goTab('map'); }
+  }).catch(function(e){toast('خطأ: '+e.message,'err');});
+}
+
+function rejectOrder(docId){
+  if(!FB_READY) return;
+  DB.collection('orders').doc(docId).update({status:'cancelled'}).then(function(){
+    toast('تم رفض الطلب','');
+  });
+}
+
+function completeOrder(docId,amount){
+  if(!FB_READY){toast('لا يوجد اتصال','err');return;}
+  // إذا لم تكن هناك قيمة، اطلب من الفني إدخالها
+  if(!amount || amount === 0){
+    var inputAmt = parseFloat(prompt('أدخل قيمة الطلب بالدينار العراقي:'));
+    if(!inputAmt || isNaN(inputAmt) || inputAmt <= 0){
+      toast('يرجى إدخال قيمة صحيحة للطلب','err');
+      return;
+    }
+    amount = inputAmt;
+  }
+  var commission=Math.round((amount||0)*COMMISSION_RATE);
+  var newWallet=Math.max(0,(techData.wallet||0)-commission);
+  DB.collection('orders').doc(docId).update({
+    status:'done',
+    amount:amount,
+    commission:commission,
+    completedAt:new Date().toISOString()
+  }).then(function(){
+    return DB.collection('techs').doc(techData.docId).update({
+      wallet:newWallet,
+      ordersCount:(techData.ordersCount||0)+1
+    });
+  }).then(function(){
+    techData.wallet=newWallet;
+    techData.ordersCount=(techData.ordersCount||0)+1;
+    localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+    document.getElementById('st-wallet').textContent=newWallet.toLocaleString('ar-IQ');
+    document.getElementById('w-balance').textContent=newWallet.toLocaleString('ar-IQ');
+    toast('✅ تم إتمام الطلب — عمولة '+commission.toLocaleString('ar-IQ')+' د.ع','ok');
+    if(navRoute){try{navMap.removeLayer(navRoute);}catch(e){}navRoute=null;}
+  }).catch(function(e){toast('خطأ: '+e.message,'err');});
+}
+
+// ══════════════════════════════════════
+// NAVIGATION MAP
+// ══════════════════════════════════════
+function startNav(lat,lng){
+  goTab('map');
+  setTimeout(function(){
+    if(!navMap){
+      var el=document.getElementById('nav-map');
+      if(!el) return;
+      navMap=L.map(el).setView([lat,lng],14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(navMap);
+    }
+    navMap.invalidateSize();
+    if(navRoute){try{navMap.removeLayer(navRoute);}catch(e){}}
+    if(!navigator.geolocation){
+      navMap.setView([lat,lng],15);
+      L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function(p){
+      var tLat=p.coords.latitude,tLng=p.coords.longitude;
+      try{
+        navRoute=L.Routing.control({
+          waypoints:[L.latLng(tLat,tLng),L.latLng(lat,lng)],
+          routeWhileDragging:false,
+          lineOptions:{styles:[{color:'#f0a500',weight:5}]},
+          createMarker:function(i,wp){
+            return L.marker(wp.latLng,{title:i===0?'موقعي':'الزبون'});
+          }
+        }).addTo(navMap);
+      }catch(e){
+        navMap.setView([lat,lng],14);
+        L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+      }
+    },function(){
+      navMap.setView([lat,lng],15);
+      L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+    });
+  },300);
+}
+
+// ══════════════════════════════════════
+// NAVIGATION TABS
+// ══════════════════════════════════════
+function goTab(tab){
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    var tabs=['home','history','map','wallet','profile','notifs'];
+    t.classList.toggle('on',tabs[i]===tab);
+  });
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.getElementById('pg-'+tab).classList.add('on');
+  if(tab==='map') setTimeout(function(){navMap?.invalidateSize();},200);
+}
+
+// ══════════════════════════════════════
+// LOGOUT & HELPERS
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════
+var techNotifUnsub = null;
+var techSeenNotifs = [];
+
+function loadTechNotifs(){
+  if(!FB_READY) return;
+  techSeenNotifs = JSON.parse(localStorage.getItem('tl_tech_seen_notifs')||'[]');
+  if(techNotifUnsub) techNotifUnsub();
+  techNotifUnsub = DB.collection('notifications')
+    .where('target','in',['all','techs'])
+    .onSnapshot(function(snap){
+      var notifs = snap.docs.map(function(d){return Object.assign({docId:d.id},d.data());}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+      renderTechNotifs(notifs);
+      var unseen = notifs.filter(function(n){return techSeenNotifs.indexOf(n.docId)===-1;}).length;
+      var badge = document.getElementById('notif-badge');
+      if(badge){ badge.style.display = unseen>0?'inline-block':'none'; badge.textContent = unseen; }
+    }, function(){});
+}
+
+function renderTechNotifs(notifs){
+  var el = document.getElementById('notifs-list');
+  if(!el) return;
+  if(!notifs.length){ el.innerHTML='<div class="empty"><div class="empty-ic">🔔</div><div>لا توجد إشعارات</div></div>'; return; }
+  el.innerHTML = notifs.map(function(n){
+    var timeStr = n.ts ? new Date(n.ts).toLocaleString('ar-IQ') : '';
+    return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px">'+
+      '<div style="font-size:14px;font-weight:700;margin-bottom:4px">📢 '+(n.title||n.message||'إشعار')+'</div>'+
+      (n.body?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+n.body+'</div>':'')+
+      (n.message && !n.title?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+n.message+'</div>':'')+
+      '<div style="font-size:11px;color:var(--muted)">'+timeStr+'</div>'+
+    '</div>';
+  }).join('');
+  techSeenNotifs = notifs.map(function(n){return n.docId;});
+  localStorage.setItem('tl_tech_seen_notifs', JSON.stringify(techSeenNotifs));
+}
+
+function logout(){
+  localStorage.removeItem('tl_tech_session');
+  techData=null;isOnline=false;
+  if(ordersUnsub)ordersUnsub();
+  if(activeUnsub)activeUnsub();
+  if(historyUnsub)historyUnsub();
+  showScreen('auth');
+}
+
+// ══════════════════════════════════════
+// NEW ORDER (Tech creates for customer)
+// ══════════════════════════════════════
+var noOrderMap = null, noOrderMarker = null, noOrderLat = null, noOrderLng = null;
+
+function openNewOrderModal(){
+  document.getElementById('new-order-modal').style.display='flex';
+  document.getElementById('no-cust-name').value='';
+  document.getElementById('no-cust-phone').value='';
+  document.getElementById('no-loc-search').value='';
+  document.getElementById('no-amount').value='';
+  document.getElementById('no-desc').value='';
+  document.getElementById('no-loc-status').textContent='اضغط على الخريطة أو ابحث لتحديد الموقع';
+  noOrderLat=null; noOrderLng=null;
+  setTimeout(initNoOrderMap, 250);
+}
+
+function closeNewOrderModal(){
+  document.getElementById('new-order-modal').style.display='none';
+}
+
+function initNoOrderMap(){
+  var el = document.getElementById('no-order-map');
+  if(!el) return;
+  if(noOrderMap){ noOrderMap.remove(); noOrderMap=null; noOrderMarker=null; }
+  var startLat = techData.lat || 33.3152, startLng = techData.lng || 44.3661;
+  noOrderMap = L.map(el).setView([startLat,startLng],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(noOrderMap);
+  noOrderMap.on('click', function(e){
+    setNoOrderLoc(e.latlng.lat, e.latlng.lng, null);
+  });
+  setTimeout(function(){ noOrderMap.invalidateSize(); }, 100);
+}
+
+function setNoOrderLoc(lat, lng, label){
+  noOrderLat=lat; noOrderLng=lng;
+  if(noOrderMarker){ noOrderMap.removeLayer(noOrderMarker); }
+  noOrderMarker = L.marker([lat,lng]).addTo(noOrderMap);
+  noOrderMap.setView([lat,lng],15);
+  document.getElementById('no-loc-status').innerHTML = '✅ '+(label?('<b>'+label+'</b>'):'تم تحديد الموقع')+' — <span style="font-family:monospace;color:var(--muted)">'+lat.toFixed(5)+', '+lng.toFixed(5)+'</span>';
+}
+
+function useMyLocationForOrder(){
+  if(!navigator.geolocation){ toast('GPS غير مدعوم','err'); return; }
+  navigator.geolocation.getCurrentPosition(function(p){
+    setNoOrderLoc(p.coords.latitude, p.coords.longitude, 'موقعي الحالي');
+  }, function(){ toast('تعذر تحديد الموقع','err'); });
+}
+
+var noLocSearchTimeout = null;
+function searchNoLocation(query){
+  clearTimeout(noLocSearchTimeout);
+  var dd = document.getElementById('no-loc-dd');
+  if(!query || query.trim().length < 3){ dd.style.display='none'; return; }
+  noLocSearchTimeout = setTimeout(function(){
+    var q = encodeURIComponent(query + ' العراق');
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q='+q+'&limit=6&accept-language=ar')
+      .then(function(r){ return r.json(); })
+      .then(function(results){
+        if(!results.length){
+          dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--muted)">لا توجد نتائج</div>';
+          dd.style.display='block'; return;
+        }
+        dd.innerHTML = results.map(function(r){
+          var name = r.display_name;
+          var safeName = name.replace(/'/g,"&#39;");
+          return '<div data-lat="'+r.lat+'" data-lng="'+r.lon+'" data-name="'+safeName+'" onclick="selectNoLocation(this)" style="padding:9px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--bd)">📍 '+name+'</div>';
+        }).join('');
+        dd.style.display='block';
+      }).catch(function(){
+        dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--red)">تعذر البحث</div>';
+        dd.style.display='block';
+      });
+  }, 500);
+}
+
+function selectNoLocation(el){
+  var lat=parseFloat(el.getAttribute('data-lat'));
+  var lng=parseFloat(el.getAttribute('data-lng'));
+  var name=el.getAttribute('data-name');
+  setNoOrderLoc(lat, lng, name.split(',')[0]);
+  document.getElementById('no-loc-search').value = name.split(',')[0];
+  document.getElementById('no-loc-dd').style.display='none';
+}
+
+function createTechOrder(){
+  var custName = document.getElementById('no-cust-name').value.trim();
+  var custPhone = document.getElementById('no-cust-phone').value.trim();
+  var service = document.getElementById('no-service').value;
+  var amount = parseFloat(document.getElementById('no-amount').value)||0;
+  var desc = document.getElementById('no-desc').value.trim()||'—';
+
+  if(!custName){ toast('أدخل اسم الزبون','err'); return; }
+  if(!custPhone){ toast('أدخل رقم جوال الزبون','err'); return; }
+  if(!noOrderLat){ toast('حدد موقع الزبون على الخريطة','err'); return; }
+  if(!FB_READY){ toast('لا يوجد اتصال','err'); return; }
+
+  var now = new Date();
+  var order = {
+    id:'ORD-'+Math.random().toString(36).substr(2,6).toUpperCase(),
+    type:'now', typLabel:'طلب آني',
+    custName:custName, custPhone:custPhone,
+    service:service, serviceLabel:SVC[service]||service,
+    techDocId:techData.docId, techName:techData.name, techPhone:techData.phone||'',
+    amount:amount, commission:Math.round(amount*COMMISSION_RATE),
+    pay:'cash', desc:desc,
+    status:'inprogress',
+    lat:noOrderLat, lng:noOrderLng,
+    dateISO:now.toISOString().slice(0,10), dateStr:now.toLocaleDateString('ar-IQ'),
+    ts:Date.now(), createdAt:now.toISOString(), acceptedAt:now.toISOString()
+  };
+
+  DB.collection('orders').add(order).then(function(){
+    closeNewOrderModal();
+    toast('✅ تم إنشاء الطلب وقبوله','ok');
+  }).catch(function(e){ toast('خطأ: '+e.message,'err'); });
+}
+
+// ══════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════
+var currentChatId = null;
+var techChatUnsub = null;
+
+function openTechChat(orderId){
+  currentChatId = orderId;
+  document.getElementById('chat-modal').style.display='flex';
+  var el = document.getElementById('tech-chat-messages');
+  if(!FB_READY){ el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">لا يوجد اتصال</div>'; return; }
+  if(techChatUnsub) techChatUnsub();
+  techChatUnsub = DB.collection('chats').doc(orderId).collection('messages')
+    .orderBy('ts','asc')
+    .onSnapshot(function(snap){
+      if(snap.empty){ el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">لا توجد رسائل بعد</div>'; return; }
+      el.innerHTML = snap.docs.map(function(d){
+        var m = d.data();
+        var isMe = m.sender === 'tech';
+        return '<div class="msg '+(isMe?'msg-me':'msg-other')+'">'+m.text+'<div class="msg-time">'+(m.senderName||'')+'</div></div>';
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }, function(){});
+}
+
+function sendTechMsg(){
+  var inp = document.getElementById('tech-chat-inp');
+  var text = inp.value.trim();
+  if(!text || !currentChatId || !FB_READY) return;
+  DB.collection('chats').doc(currentChatId).collection('messages').add({
+    text: text,
+    sender: 'tech',
+    senderName: techData.name||'الفني',
+    ts: Date.now()
+  });
+  inp.value = '';
+}
+
+function closeChat(){
+  document.getElementById('chat-modal').style.display='none';
+  if(techChatUnsub){ techChatUnsub(); techChatUnsub=null; }
+}
+
+function playSound(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [440,550,660].forEach(function(freq,i){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=freq;g.gain.setValueAtTime(.3,ctx.currentTime+i*.15);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.15+.3);
+      o.start(ctx.currentTime+i*.15);o.stop(ctx.currentTime+i*.15+.3);
+    });
+  }catch(e){}
+}
+
+function toast(msg,type){
+  var el=document.createElement('div');
+  el.className='toast'+(type?' '+type:'');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){el.remove();},3500);
+}
+</script>
+</body>
+</html>
