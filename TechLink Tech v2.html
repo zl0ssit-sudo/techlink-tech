@@ -833,20 +833,40 @@ function acceptOrder(docId,custPhone,lat,lng){
 // LIVE PATH TRACKING (تسجيل مسار الفني)
 // ══════════════════════════════════════
 function startTracking(orderId){
-  if(!navigator.geolocation || !FB_READY) return;
+  if(!navigator.geolocation){
+    toast('⚠️ متصفحك لا يدعم تحديد الموقع — لن يُسجَّل المسار','err');
+    return;
+  }
+  if(!FB_READY){
+    toast('⚠️ لا يوجد اتصال — لن يُسجَّل المسار','err');
+    return;
+  }
   stopTracking();
   trackPath = [];
+  toast('📍 بدأ تسجيل المسار...','ok');
+  var pointCount = 0;
+  var lastSaveTime = 0;
   trackWatchId = navigator.geolocation.watchPosition(function(pos){
     var point = {lat:pos.coords.latitude, lng:pos.coords.longitude, ts:Date.now()};
     trackPath.push(point);
-    // احفظ آخر نقطة + كامل المسار في Firebase (throttled كل نقطة جديدة)
+    pointCount++;
+    // تقليل عدد الكتابات: نقطة واحدة كل 8 ثوانٍ على الأقل لتوفير حصة Firebase
+    var now = Date.now();
+    if(now - lastSaveTime < 8000) return;
+    lastSaveTime = now;
     DB.collection('orders').doc(orderId).update({
       techCurrentLat: point.lat,
       techCurrentLng: point.lng,
       techPath: firebase.firestore.FieldValue.arrayUnion(point)
-    }).catch(function(){});
+    }).then(function(){
+      console.log('✅ Path point #'+pointCount+' saved:', point);
+    }).catch(function(err){
+      console.error('❌ فشل حفظ نقطة المسار:', err.message);
+      toast('⚠️ فشل تسجيل الموقع: '+err.message,'err');
+    });
   }, function(err){
-    console.warn('Tracking error:', err.message);
+    console.warn('Tracking GPS error:', err.message);
+    toast('⚠️ تعذر تحديد موقعك: '+err.message,'err');
   }, {enableHighAccuracy:true, maximumAge:5000, timeout:10000});
 }
 
