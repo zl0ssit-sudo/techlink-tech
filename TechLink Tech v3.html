@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>TechLink — تطبيق الفني</title>
+<title>TechLink â€” ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„ÙÙ†ÙŠ</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -18,7 +18,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script>
 var DB, AUTH, STORAGE, FB_READY = false;
-// أظهر splash فوراً
+// Ø£Ø¸Ù‡Ø± splash ÙÙˆØ±Ø§Ù‹
 document.addEventListener('DOMContentLoaded', function(){
   showScreen('splash');
 });
@@ -109,7 +109,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .tech-name-sm{font-size:12px;color:var(--muted)}
 .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#07090f}
 
-/* ── تبديل المظهر واللغة ── */
+/* â”€â”€ ØªØ¨Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø¸Ù‡Ø± ÙˆØ§Ù„Ù„ØºØ© â”€â”€ */
 .lang-toggle{
   min-width:34px;height:28px;padding:0 9px;border-radius:14px;
   background:var(--s2);border:1px solid var(--bd);
@@ -215,20 +215,15 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .toast.ok{border-right-color:var(--green)}.toast.err{border-right-color:var(--red)}
 @keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(5,1fr);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
-.bnav-btn{display:flex;flex-direction:column;align-items:center;padding:8px 0;cursor:pointer;color:var(--muted);font-size:9px;font-weight:700;gap:2px;transition:color .2s}
-.bnav-btn.on{color:var(--gold)}
-.bnav-ic{font-size:20px;line-height:1}
 </style>
 </head>
 <body>
 
 <!-- SPLASH -->
 <div class="screen" id="splash" style="display:none">
-  <div class="sp-logo">🔧</div>
+  <div class="sp-logo">ðŸ”§</div>
   <div class="sp-title">Tech<span>Link</span></div>
-  <div class="sp-sub">بوابة الفنيين المحترفين</div>
+  <div class="sp-sub">Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„ÙÙ†ÙŠÙŠÙ† Ø§Ù„Ù…Ø­ØªØ±ÙÙŠÙ†</div>
   <div class="sp-loader"></div>
 </div>
 
@@ -236,64 +231,65 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <div class="screen" id="auth">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-ic">🔧</div>
-      <div class="auth-logo-txt">Tech<span>Link</span> <span style="color:var(--muted);font-size:14px">فني</span></div>
+      <div class="auth-logo-ic">ðŸ”§</div>
+      <div class="auth-logo-txt">Tech<span>Link</span> <span style="color:var(--muted);font-size:14px">ÙÙ†ÙŠ</span></div>
     </div>
-    <div class="auth-sub-txt">بوابة الفنيين المحترفين</div>
+    <div class="auth-sub-txt">Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„ÙÙ†ÙŠÙŠÙ† Ø§Ù„Ù…Ø­ØªØ±ÙÙŠÙ†</div>
     <div class="auth-tabs">
-      <div class="auth-tab on" id="tab-login" onclick="authTab('login')">تسجيل الدخول</div>
-      <div class="auth-tab" id="tab-reg" onclick="authTab('reg')">حساب جديد</div>
+      <div class="auth-tab on" id="tab-login" onclick="authTab('login')">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„</div>
+      <div class="auth-tab" id="tab-reg" onclick="authTab('reg')">Ø­Ø³Ø§Ø¨ Ø¬Ø¯ÙŠØ¯</div>
     </div>
 
     <!-- LOGIN -->
     <div id="form-login">
-      <div class="lbl">رقم الجوال</div>
+      <div class="lbl">Ø±Ù‚Ù… Ø§Ù„Ø¬ÙˆØ§Ù„</div>
       <div class="inp-row">
-        <div class="inp-code">🇮🇶 +964</div>
+        <div class="inp-code">ðŸ‡®ðŸ‡¶ +964</div>
         <input class="inp-phone" id="l-phone" type="tel" placeholder="07xxxxxxxxx" maxlength="11">
       </div>
-      <button class="btn-main" id="l-send-btn" onclick="loginSend()">إرسال رمز التحقق</button>
+      <button class="btn-main" id="l-send-btn" onclick="loginSend()">Ø¥Ø±Ø³Ø§Ù„ Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚</button>
+      <div id="recaptcha-container"></div>
       <div id="l-otp-section" style="display:none;margin-top:14px">
-        <div class="lbl">رمز التحقق (123456)</div>
+        <div class="lbl">Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚ (123456)</div>
         <div class="otp-row">
-          <input class="otp-inp" id="o1" maxlength="1" oninput="om(this,'o2')" onclick="this.select()">
-          <input class="otp-inp" id="o2" maxlength="1" oninput="om(this,'o3')" onclick="this.select()">
-          <input class="otp-inp" id="o3" maxlength="1" oninput="om(this,'o4')" onclick="this.select()">
-          <input class="otp-inp" id="o4" maxlength="1" oninput="om(this,'o5')" onclick="this.select()">
-          <input class="otp-inp" id="o5" maxlength="1" oninput="om(this,'o6')" onclick="this.select()">
-          <input class="otp-inp" id="o6" maxlength="1" oninput="otpDone()" onclick="this.select()">
+          <input class="otp-inp" id="o1" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="om(this,'o2')" onclick="this.select()">
+          <input class="otp-inp" id="o2" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="om(this,'o3')" onclick="this.select()">
+          <input class="otp-inp" id="o3" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="om(this,'o4')" onclick="this.select()">
+          <input class="otp-inp" id="o4" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="om(this,'o5')" onclick="this.select()">
+          <input class="otp-inp" id="o5" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="om(this,'o6')" onclick="this.select()">
+          <input class="otp-inp" id="o6" maxlength="1" inputmode="numeric" pattern="[0-9]*" oninput="otpDone()" onclick="this.select()">
         </div>
-        <button class="btn-main" onclick="loginVerify()">دخول</button>
+        <button class="btn-main" onclick="loginVerify()">Ø¯Ø®ÙˆÙ„</button>
       </div>
       <div class="auth-err" id="l-err"></div>
     </div>
 
     <!-- REGISTER -->
     <div id="form-reg" style="display:none">
-      <div class="lbl">الاسم الكامل</div>
-      <input class="inp" id="r-name" placeholder="اسمك الكامل">
-      <div class="lbl">رقم الجوال</div>
+      <div class="lbl">Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„</div>
+      <input class="inp" id="r-name" placeholder="Ø§Ø³Ù…Ùƒ Ø§Ù„ÙƒØ§Ù…Ù„">
+      <div class="lbl">Ø±Ù‚Ù… Ø§Ù„Ø¬ÙˆØ§Ù„</div>
       <div class="inp-row">
-        <div class="inp-code">🇮🇶 +964</div>
+        <div class="inp-code">ðŸ‡®ðŸ‡¶ +964</div>
         <input class="inp-phone" id="r-phone" type="tel" placeholder="07xxxxxxxxx" maxlength="11">
       </div>
-      <div class="lbl">التخصص</div>
+      <div class="lbl">Ø§Ù„ØªØ®ØµØµ</div>
       <select class="inp" id="r-spec" style="cursor:pointer">
-        <option value="electric">⚡ كهرباء</option>
-        <option value="plumb">🔧 سباكة</option>
-        <option value="ac">❄️ تكييف</option>
-        <option value="paint">🎨 دهان</option>
-        <option value="carp">🪚 نجارة</option>
-        <option value="clean">🧹 تنظيف</option>
-        <option value="tile">🪟 بلاط</option>
-        <option value="other">🔨 متعدد</option>
+        <option value="electric">âš¡ ÙƒÙ‡Ø±Ø¨Ø§Ø¡</option>
+        <option value="plumb">ðŸ”§ Ø³Ø¨Ø§ÙƒØ©</option>
+        <option value="ac">â„ï¸ ØªÙƒÙŠÙŠÙ</option>
+        <option value="paint">ðŸŽ¨ Ø¯Ù‡Ø§Ù†</option>
+        <option value="carp">ðŸªš Ù†Ø¬Ø§Ø±Ø©</option>
+        <option value="clean">ðŸ§¹ ØªÙ†Ø¸ÙŠÙ</option>
+        <option value="tile">ðŸªŸ Ø¨Ù„Ø§Ø·</option>
+        <option value="other">ðŸ”¨ Ù…ØªØ¹Ø¯Ø¯</option>
       </select>
-      <div class="lbl">المدينة</div>
-      <input class="inp" id="r-city" placeholder="بغداد">
-      <div class="lbl">سعر الكشفية (د.ع)</div>
-      <input class="inp" id="r-price" type="number" placeholder="مثال: 15000">
-      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px">السعر الذي سيظهر للزبون عند طلب خدمتك</div>
-      <button class="btn-main" onclick="register()">طلب تسجيل</button>
+      <div class="lbl">Ø§Ù„Ù…Ø¯ÙŠÙ†Ø©</div>
+      <input class="inp" id="r-city" placeholder="Ø¨ØºØ¯Ø§Ø¯">
+      <div class="lbl">Ø³Ø¹Ø± Ø§Ù„ÙƒØ´ÙÙŠØ© (Ø¯.Ø¹)</div>
+      <input class="inp" id="r-price" type="number" placeholder="Ù…Ø«Ø§Ù„: 15000">
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px">Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø°ÙŠ Ø³ÙŠØ¸Ù‡Ø± Ù„Ù„Ø²Ø¨ÙˆÙ† Ø¹Ù†Ø¯ Ø·Ù„Ø¨ Ø®Ø¯Ù…ØªÙƒ</div>
+      <button class="btn-main" onclick="register()">Ø·Ù„Ø¨ ØªØ³Ø¬ÙŠÙ„</button>
       <div class="auth-err" id="r-err"></div>
     </div>
   </div>
@@ -301,11 +297,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 
 <!-- PENDING -->
 <div class="screen" id="pending">
-  <div class="pend-ic">⏳</div>
-  <div class="pend-title">طلبك قيد المراجعة</div>
-  <div class="pend-sub">تم إرسال طلب تسجيلك للإدارة.<br>ستحصل على إشعار عند التفعيل.</div>
-  <button class="btn-outline" onclick="checkActivation()">🔄 تحقق من حالة حسابي</button>
-  <button class="btn-outline" style="margin-top:8px;border-color:var(--red);color:var(--red)" onclick="logout()">تسجيل الخروج</button>
+  <div class="pend-ic">â³</div>
+  <div class="pend-title">Ø·Ù„Ø¨Ùƒ Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©</div>
+  <div class="pend-sub">ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ ØªØ³Ø¬ÙŠÙ„Ùƒ Ù„Ù„Ø¥Ø¯Ø§Ø±Ø©.<br>Ø³ØªØ­ØµÙ„ Ø¹Ù„Ù‰ Ø¥Ø´Ø¹Ø§Ø± Ø¹Ù†Ø¯ Ø§Ù„ØªÙØ¹ÙŠÙ„.</div>
+  <button class="btn-outline" onclick="checkActivation()">ðŸ”„ ØªØ­Ù‚Ù‚ Ù…Ù† Ø­Ø§Ù„Ø© Ø­Ø³Ø§Ø¨ÙŠ</button>
+  <button class="btn-outline" style="margin-top:8px;border-color:var(--red);color:var(--red)" onclick="logout()">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬</button>
 </div>
 
 <!-- APP -->
@@ -313,41 +309,41 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   <div class="topbar">
     <div class="online-toggle" onclick="toggleOnline()">
       <div class="online-dot" id="online-dot"></div>
-      <div class="online-txt" id="online-txt" data-i18n="unavailable">غير متاح</div>
+      <div class="online-txt" id="online-txt" data-i18n="unavailable">ØºÙŠØ± Ù…ØªØ§Ø­</div>
     </div>
     <div class="topbar-right">
       <div class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN</div>
-      <div class="theme-toggle" onclick="toggleTheme()"><div class="theme-knob" id="theme-knob">☀️</div></div>
-      <div class="tech-name-sm" id="tech-name-sm">—</div>
-      <div class="avatar" id="tech-av">ف</div>
+      <div class="theme-toggle" onclick="toggleTheme()"><div class="theme-knob" id="theme-knob">â˜€ï¸</div></div>
+      <div class="tech-name-sm" id="tech-name-sm">â€”</div>
+      <div class="avatar" id="tech-av">Ù</div>
     </div>
   </div>
 
   <div class="tabs">
-    <div class="tab on" onclick="goTab('home')"><span data-i18n="home">🏠 الرئيسية</span></div>
-    <div class="tab" onclick="goTab('history')"><span data-i18n="history">📋 السجل</span></div>
-    <div class="tab" onclick="goTab('map')"><span data-i18n="navigate">🗺️ الملاحة</span></div>
-    <div class="tab" onclick="goTab('wallet')"><span data-i18n="wallet">💰 المحفظة</span></div>
-    <div class="tab" onclick="goTab('profile')"><span data-i18n="myAccount">👤 حسابي</span></div>
-    <div class="tab" onclick="goTab('notifs')">🔔 <span id="notif-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px">0</span></div>
+    <div class="tab on" onclick="goTab('home')"><span data-i18n="home">ðŸ  Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©</span></div>
+    <div class="tab" onclick="goTab('history')"><span data-i18n="history">ðŸ“‹ Ø§Ù„Ø³Ø¬Ù„</span></div>
+    <div class="tab" onclick="goTab('map')"><span data-i18n="navigate">ðŸ—ºï¸ Ø§Ù„Ù…Ù„Ø§Ø­Ø©</span></div>
+    <div class="tab" onclick="goTab('wallet')"><span data-i18n="wallet">ðŸ’° Ø§Ù„Ù…Ø­ÙØ¸Ø©</span></div>
+    <div class="tab" onclick="goTab('profile')"><span data-i18n="myAccount">ðŸ‘¤ Ø­Ø³Ø§Ø¨ÙŠ</span></div>
+    <div class="tab" onclick="goTab('notifs')">ðŸ”” <span id="notif-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px">0</span></div>
   </div>
 
   <!-- HOME -->
   <div class="page on" id="pg-home">
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val blue" id="st-orders">0</div><div class="stat-lbl" data-i18n="completedOrders">الطلبات المكتملة</div></div>
-      <div class="stat-card"><div class="stat-val gold" id="st-wallet">0</div><div class="stat-lbl" data-i18n="walletBalance">رصيد المحفظة (د.ع)</div></div>
+      <div class="stat-card"><div class="stat-val blue" id="st-orders">0</div><div class="stat-lbl" data-i18n="completedOrders">Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…ÙƒØªÙ…Ù„Ø©</div></div>
+      <div class="stat-card"><div class="stat-val gold" id="st-wallet">0</div><div class="stat-lbl" data-i18n="walletBalance">Ø±ØµÙŠØ¯ Ø§Ù„Ù…Ø­ÙØ¸Ø© (Ø¯.Ø¹)</div></div>
     </div>
-    <button class="btn-main" style="margin-bottom:14px" onclick="openNewOrderModal()" data-i18n="createForCustomer">+ إنشاء طلب لزبون</button>
-    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px" data-i18n="incomingOrders">الطلبات الواردة</div>
-    <div id="incoming-list"><div class="empty"><div class="empty-ic">📭</div><div data-i18n="enableAvailable">فعّل "متاح" لاستقبال الطلبات</div></div></div>
-    <div style="font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 10px" data-i18n="myActiveJobs">طلباتي الحالية</div>
-    <div id="active-list"><div class="empty"><div class="empty-ic">🔧</div><div data-i18n="noActiveJobs">لا توجد طلبات نشطة</div></div></div>
+    <button class="btn-main" style="margin-bottom:14px" onclick="openNewOrderModal()" data-i18n="createForCustomer">+ Ø¥Ù†Ø´Ø§Ø¡ Ø·Ù„Ø¨ Ù„Ø²Ø¨ÙˆÙ†</button>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px" data-i18n="incomingOrders">Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„ÙˆØ§Ø±Ø¯Ø©</div>
+    <div id="incoming-list"><div class="empty"><div class="empty-ic">ðŸ“­</div><div data-i18n="enableAvailable">ÙØ¹Ù‘Ù„ "Ù…ØªØ§Ø­" Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø·Ù„Ø¨Ø§Øª</div></div></div>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 10px" data-i18n="myActiveJobs">Ø·Ù„Ø¨Ø§ØªÙŠ Ø§Ù„Ø­Ø§Ù„ÙŠØ©</div>
+    <div id="active-list"><div class="empty"><div class="empty-ic">ðŸ”§</div><div data-i18n="noActiveJobs">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª Ù†Ø´Ø·Ø©</div></div></div>
   </div>
 
   <!-- HISTORY -->
   <div class="page" id="pg-history">
-    <div id="history-list"><div class="empty"><div class="empty-ic">📋</div><div>لا يوجد سجل بعد</div></div></div>
+    <div id="history-list"><div class="empty"><div class="empty-ic">ðŸ“‹</div><div data-i18n="noHistory">Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø³Ø¬Ù„ Ø¨Ø¹Ø¯</div></div></div>
   </div>
 
   <!-- MAP -->
@@ -358,28 +354,28 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
   <!-- WALLET -->
   <div class="page" id="pg-wallet">
     <div class="wallet-card">
-      <div class="wc-label">رصيد المحفظة</div>
+      <div class="wc-label" data-i18n="walletBalanceLbl">Ø±ØµÙŠØ¯ Ø§Ù„Ù…Ø­ÙØ¸Ø©</div>
       <div class="wc-amount" id="w-balance">0</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">دينار عراقي</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Ø¯ÙŠÙ†Ø§Ø± Ø¹Ø±Ø§Ù‚ÙŠ</div>
     </div>
-    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">سجل المعاملات</div>
-    <div id="txn-list"><div class="empty"><div class="empty-ic">💳</div><div>لا توجد معاملات بعد</div></div></div>
+    <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px" data-i18n="transactionHistory">Ø³Ø¬Ù„ Ø§Ù„Ù…Ø¹Ø§Ù…Ù„Ø§Øª</div>
+    <div id="txn-list"><div class="empty"><div class="empty-ic">ðŸ’³</div><div data-i18n="noTransactions">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ø¹Ø§Ù…Ù„Ø§Øª Ø¨Ø¹Ø¯</div></div></div>
   </div>
 
   <!-- NOTIFICATIONS -->
   <div class="page" id="pg-notifs">
-    <div id="notifs-list"><div class="empty"><div class="empty-ic">🔔</div><div>لا توجد إشعارات</div></div></div>
+    <div id="notifs-list"><div class="empty"><div class="empty-ic">ðŸ””</div><div data-i18n="noNotifications">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¥Ø´Ø¹Ø§Ø±Ø§Øª</div></div></div>
   </div>
 
   <!-- PROFILE -->
   <div class="page" id="pg-profile">
     <div class="prof-card">
-      <div class="prof-av" id="prof-av">ف</div>
-      <div class="prof-name" id="prof-name">—</div>
-      <div class="prof-spec" id="prof-spec">—</div>
-      <div class="prof-phone" id="prof-phone">—</div>
+      <div class="prof-av" id="prof-av">Ù</div>
+      <div class="prof-name" id="prof-name">â€”</div>
+      <div class="prof-spec" id="prof-spec">â€”</div>
+      <div class="prof-phone" id="prof-phone">â€”</div>
     </div>
-    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    <button class="logout-btn" onclick="logout()" data-i18n="logout">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬</button>
   </div>
 </div>
 
@@ -387,43 +383,43 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-end;justify-content:center" id="new-order-modal" onclick="if(event.target===this)closeNewOrderModal()">
   <div style="background:var(--s1);border:1px solid var(--bd);border-radius:20px 20px 0 0;padding:18px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <span style="font-size:15px;font-weight:800">طلب جديد لزبون</span>
-      <button onclick="closeNewOrderModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+      <span style="font-size:15px;font-weight:800">Ø·Ù„Ø¨ Ø¬Ø¯ÙŠØ¯ Ù„Ø²Ø¨ÙˆÙ†</span>
+      <button onclick="closeNewOrderModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">âœ•</button>
     </div>
 
-    <div class="lbl">اسم الزبون</div>
-    <input class="inp" id="no-cust-name" placeholder="اسم الزبون">
-    <div class="lbl">رقم جوال الزبون</div>
+    <div class="lbl">Ø§Ø³Ù… Ø§Ù„Ø²Ø¨ÙˆÙ†</div>
+    <input class="inp" id="no-cust-name" placeholder="Ø§Ø³Ù… Ø§Ù„Ø²Ø¨ÙˆÙ†">
+    <div class="lbl">Ø±Ù‚Ù… Ø¬ÙˆØ§Ù„ Ø§Ù„Ø²Ø¨ÙˆÙ†</div>
     <input class="inp" id="no-cust-phone" placeholder="07xxxxxxxxx">
 
-    <div class="lbl">📍 موقع الزبون</div>
-    <input class="inp" id="no-loc-search" placeholder="ابحث عن منطقة أو عنوان..." oninput="searchNoLocation(this.value)" autocomplete="off">
+    <div class="lbl">ðŸ“ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†</div>
+    <input class="inp" id="no-loc-search" placeholder="Ø§Ø¨Ø­Ø« Ø¹Ù† Ù…Ù†Ø·Ù‚Ø© Ø£Ùˆ Ø¹Ù†ÙˆØ§Ù†..." oninput="searchNoLocation(this.value)" autocomplete="off">
     <div id="no-loc-dd" style="display:none;background:var(--s2);border:1px solid var(--bd);border-radius:8px;max-height:160px;overflow-y:auto;margin-bottom:8px"></div>
     <div style="border-radius:10px;border:1px solid var(--bd);height:180px;margin-bottom:8px;overflow:hidden">
       <div id="no-order-map" style="height:100%;width:100%"></div>
     </div>
-    <button class="btn-outline" style="margin-bottom:12px" onclick="useMyLocationForOrder()">📍 استخدم موقعي الحالي</button>
-    <div id="no-loc-status" style="font-size:11px;color:var(--muted);margin-bottom:12px">اضغط على الخريطة أو ابحث لتحديد الموقع</div>
+    <button class="btn-outline" style="margin-bottom:12px" onclick="useMyLocationForOrder()">ðŸ“ Ø§Ø³ØªØ®Ø¯Ù… Ù…ÙˆÙ‚Ø¹ÙŠ Ø§Ù„Ø­Ø§Ù„ÙŠ</button>
+    <div id="no-loc-status" style="font-size:11px;color:var(--muted);margin-bottom:12px">Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø±ÙŠØ·Ø© Ø£Ùˆ Ø§Ø¨Ø­Ø« Ù„ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹</div>
 
-    <div class="lbl">نوع الخدمة</div>
+    <div class="lbl">Ù†ÙˆØ¹ Ø§Ù„Ø®Ø¯Ù…Ø©</div>
     <select class="inp" id="no-service">
-      <option value="electric">⚡ كهرباء</option>
-      <option value="plumb">🔧 سباكة</option>
-      <option value="ac">❄️ تكييف</option>
-      <option value="paint">🎨 دهان</option>
-      <option value="carp">🪚 نجارة</option>
-      <option value="clean">🧹 تنظيف</option>
-      <option value="tile">🪟 بلاط</option>
-      <option value="other">🔨 أخرى</option>
+      <option value="electric">âš¡ ÙƒÙ‡Ø±Ø¨Ø§Ø¡</option>
+      <option value="plumb">ðŸ”§ Ø³Ø¨Ø§ÙƒØ©</option>
+      <option value="ac">â„ï¸ ØªÙƒÙŠÙŠÙ</option>
+      <option value="paint">ðŸŽ¨ Ø¯Ù‡Ø§Ù†</option>
+      <option value="carp">ðŸªš Ù†Ø¬Ø§Ø±Ø©</option>
+      <option value="clean">ðŸ§¹ ØªÙ†Ø¸ÙŠÙ</option>
+      <option value="tile">ðŸªŸ Ø¨Ù„Ø§Ø·</option>
+      <option value="other">ðŸ”¨ Ø£Ø®Ø±Ù‰</option>
     </select>
 
-    <div class="lbl">القيمة (د.ع)</div>
+    <div class="lbl">Ø§Ù„Ù‚ÙŠÙ…Ø© (Ø¯.Ø¹)</div>
     <input class="inp" id="no-amount" type="number" placeholder="0">
 
-    <div class="lbl">ملاحظات</div>
-    <input class="inp" id="no-desc" placeholder="تفاصيل الطلب...">
+    <div class="lbl">Ù…Ù„Ø§Ø­Ø¸Ø§Øª</div>
+    <input class="inp" id="no-desc" placeholder="ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨...">
 
-    <button class="btn-main" onclick="createTechOrder()">إنشاء الطلب وقبوله</button>
+    <button class="btn-main" onclick="createTechOrder()">Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø·Ù„Ø¨ ÙˆÙ‚Ø¨ÙˆÙ„Ù‡</button>
   </div>
 </div>
 
@@ -431,15 +427,15 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <div style="position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-end;justify-content:center" id="chat-modal" onclick="if(event.target===this)closeChat()">
   <div style="background:var(--s1);border:1px solid var(--bd);border-radius:20px 20px 0 0;padding:18px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <span style="font-size:15px;font-weight:800">💬 المحادثة مع الزبون</span>
-      <button onclick="closeChat()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+      <span style="font-size:15px;font-weight:800">ðŸ’¬ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø© Ù…Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†</span>
+      <button onclick="closeChat()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">âœ•</button>
     </div>
     <div class="chat-box" id="tech-chat-messages">
-      <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">ابدأ المحادثة مع الزبون</div>
+      <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Ø§Ø¨Ø¯Ø£ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø© Ù…Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†</div>
     </div>
     <div class="chat-inp-row">
-      <input class="chat-inp" id="tech-chat-inp" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendTechMsg()">
-      <button class="chat-send" onclick="sendTechMsg()">➤</button>
+      <input class="chat-inp" id="tech-chat-inp" placeholder="Ø§ÙƒØªØ¨ Ø±Ø³Ø§Ù„Ø©..." onkeydown="if(event.key==='Enter')sendTechMsg()">
+      <button class="chat-send" onclick="sendTechMsg()">âž¤</button>
     </div>
   </div>
 </div>
@@ -448,10 +444,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 <div id="recaptcha-box"></div>
 
 <script>
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STATE
-// ══════════════════════════════════════
-var DEMO = true;
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+var USE_REAL_OTP = false; // Ø§Ø¬Ø¹Ù„Ù‡Ø§ true Ø¨Ø¹Ø¯ ØªÙØ¹ÙŠÙ„ Ø®Ø·Ø© Blaze Ùˆ Phone Authentication ÙÙŠ Firebase Console
 var techData = null;
 var currentPhone = '';
 var isOnline = false;
@@ -461,11 +457,13 @@ var activeOrderId = null;
 var trackWatchId = null;
 var trackPath = [];
 
-var SVC = {electric:'⚡ كهرباء',plumb:'🔧 سباكة',ac:'❄️ تكييف',paint:'🎨 دهان',carp:'🪚 نجارة',clean:'🧹 تنظيف',tile:'🪟 بلاط',other:'🔨 متعدد'};
+var SVC = {electric:'âš¡ ÙƒÙ‡Ø±Ø¨Ø§Ø¡',plumb:'ðŸ”§ Ø³Ø¨Ø§ÙƒØ©',ac:'â„ï¸ ØªÙƒÙŠÙŠÙ',paint:'ðŸŽ¨ Ø¯Ù‡Ø§Ù†',carp:'ðŸªš Ù†Ø¬Ø§Ø±Ø©',clean:'ðŸ§¹ ØªÙ†Ø¸ÙŠÙ',tile:'ðŸªŸ Ø¨Ù„Ø§Ø·',other:'ðŸ”¨ Ù…ØªØ¹Ø¯Ø¯'};
 
-// ══════════════════════════════════════
-// THEME (المظهر: فاتح/داكن)
-// ══════════════════════════════════════
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// THEME (Ø§Ù„Ù…Ø¸Ù‡Ø±: ÙØ§ØªØ­/Ø¯Ø§ÙƒÙ†)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 (function initTheme(){
   var saved = localStorage.getItem('tl_theme') || 'light';
   document.documentElement.setAttribute('data-theme', saved);
@@ -477,33 +475,60 @@ function toggleTheme(){
   var next = isLight ? 'dark' : 'light';
   html.setAttribute('data-theme', next);
   localStorage.setItem('tl_theme', next);
-  document.getElementById('theme-knob').textContent = next === 'dark' ? '🌙' : '☀️';
+  document.getElementById('theme-knob').textContent = next === 'dark' ? 'ðŸŒ™' : 'â˜€ï¸';
 }
 setTimeout(function(){
   var knob = document.getElementById('theme-knob');
-  if(knob) knob.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '🌙' : '☀️';
+  if(knob) knob.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'ðŸŒ™' : 'â˜€ï¸';
 }, 0);
 
-// ══════════════════════════════════════
-// LANGUAGE (اللغة: عربي/إنكليزي)
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LANGUAGE (Ø§Ù„Ù„ØºØ©: Ø¹Ø±Ø¨ÙŠ/Ø¥Ù†ÙƒÙ„ÙŠØ²ÙŠ)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 var currentLang = localStorage.getItem('tl_lang') || 'ar';
 
 var I18N = {
-  unavailable:        { ar:'غير متاح',                    en:'Unavailable' },
-  completedOrders:    { ar:'الطلبات المكتملة',            en:'Completed Jobs' },
-  walletBalance:      { ar:'رصيد المحفظة (د.ع)',          en:'Wallet Balance (IQD)' },
-  createForCustomer:  { ar:'+ إنشاء طلب لزبون',            en:'+ Create job for customer' },
-  incomingOrders:     { ar:'الطلبات الواردة',              en:'Incoming Jobs' },
-  enableAvailable:    { ar:'فعّل "متاح" لاستقبال الطلبات', en:'Turn on "Available" to receive jobs' },
-  myActiveJobs:       { ar:'طلباتي الحالية',              en:'My Active Jobs' },
-  noActiveJobs:       { ar:'لا توجد طلبات نشطة',          en:'No active jobs' },
-  home:               { ar:'🏠 الرئيسية',                 en:'🏠 Home' },
-  history:            { ar:'📋 السجل',                    en:'📋 History' },
-  navigate:           { ar:'🗺️ الملاحة',                  en:'🗺️ Navigate' },
-  wallet:             { ar:'💰 المحفظة',                  en:'💰 Wallet' },
-  myAccount:          { ar:'👤 حسابي',                    en:'👤 Account' }
+  unavailable:        { ar:'ØºÙŠØ± Ù…ØªØ§Ø­',                    en:'Unavailable' },
+  completedOrders:    { ar:'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…ÙƒØªÙ…Ù„Ø©',            en:'Completed Jobs' },
+  walletBalance:      { ar:'Ø±ØµÙŠØ¯ Ø§Ù„Ù…Ø­ÙØ¸Ø© (Ø¯.Ø¹)',          en:'Wallet Balance (IQD)' },
+  createForCustomer:  { ar:'+ Ø¥Ù†Ø´Ø§Ø¡ Ø·Ù„Ø¨ Ù„Ø²Ø¨ÙˆÙ†',            en:'+ Create job for customer' },
+  incomingOrders:     { ar:'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„ÙˆØ§Ø±Ø¯Ø©',              en:'Incoming Jobs' },
+  enableAvailable:    { ar:'ÙØ¹Ù‘Ù„ "Ù…ØªØ§Ø­" Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø·Ù„Ø¨Ø§Øª', en:'Turn on "Available" to receive jobs' },
+  myActiveJobs:       { ar:'Ø·Ù„Ø¨Ø§ØªÙŠ Ø§Ù„Ø­Ø§Ù„ÙŠØ©',              en:'My Active Jobs' },
+  noActiveJobs:       { ar:'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª Ù†Ø´Ø·Ø©',          en:'No active jobs' },
+  home:               { ar:'ðŸ  Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',                 en:'ðŸ  Home' },
+  history:            { ar:'ðŸ“‹ Ø§Ù„Ø³Ø¬Ù„',                    en:'ðŸ“‹ History' },
+  navigate:           { ar:'ðŸ—ºï¸ Ø§Ù„Ù…Ù„Ø§Ø­Ø©',                  en:'ðŸ—ºï¸ Navigate' },
+  wallet:             { ar:'ðŸ’° Ø§Ù„Ù…Ø­ÙØ¸Ø©',                  en:'ðŸ’° Wallet' },
+  myAccount:          { ar:'ðŸ‘¤ Ø­Ø³Ø§Ø¨ÙŠ',                    en:'ðŸ‘¤ Account' },
+  accept:             { ar:'âœ… Ù‚Ø¨ÙˆÙ„',                     en:'âœ… Accept' },
+  reject:             { ar:'âœ• Ø±ÙØ¶',                       en:'âœ• Reject' },
+  complete:           { ar:'âœ… Ø¥ØªÙ…Ø§Ù…',                     en:'âœ… Complete' },
+  navigateBtn:        { ar:'ðŸ—ºï¸ Ù…Ù„Ø§Ø­Ø©',                    en:'ðŸ—ºï¸ Navigate' },
+  walletBalanceLbl:   { ar:'Ø±ØµÙŠØ¯ Ø§Ù„Ù…Ø­ÙØ¸Ø©',                en:'Wallet Balance' },
+  transactionHistory: { ar:'Ø³Ø¬Ù„ Ø§Ù„Ù…Ø¹Ø§Ù…Ù„Ø§Øª',               en:'Transaction History' },
+  noTransactions:     { ar:'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ø¹Ø§Ù…Ù„Ø§Øª Ø¨Ø¹Ø¯',          en:'No transactions yet' },
+  noHistory:          { ar:'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø³Ø¬Ù„ Ø¨Ø¹Ø¯',              en:'No history yet' },
+  noNewOrders:        { ar:'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø·Ù„Ø¨Ø§Øª Ø¬Ø¯ÙŠØ¯Ø©',          en:'No new orders' },
+  notifications:      { ar:'ðŸ”” Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª',                en:'ðŸ”” Notifications' },
+  noNotifications:    { ar:'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¥Ø´Ø¹Ø§Ø±Ø§Øª',              en:'No notifications' },
+  profile:            { ar:'ðŸ‘¤ Ø­Ø³Ø§Ø¨ÙŠ',                    en:'ðŸ‘¤ Profile' },
+  logout:             { ar:'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬',                en:'Logout' },
+  waiting:            { ar:'Ø§Ù†ØªØ¸Ø§Ø±',                       en:'Waiting' },
+  inProgress:         { ar:'Ø¬Ø§Ø±Ù',                         en:'In Progress' },
+  done:               { ar:'Ù…ÙƒØªÙ…Ù„',                        en:'Done' },
+  cancelled:          { ar:'Ù…Ù„ØºÙŠ',                         en:'Cancelled' },
+  toastNoConnection:  { ar:'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„',                en:'No connection' },
+  toastOrderTaken:    { ar:'ØªÙ… Ø¥Ø³Ù†Ø§Ø¯ Ù‡Ø°Ø§ Ø§Ù„Ø·Ù„Ø¨ Ù„ÙÙ†ÙŠ Ø¢Ø®Ø±',   en:'This order was taken by another technician' },
+  toastOtpCooldown:   { ar:'Ø§Ù„Ø±Ø¬Ø§Ø¡ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ù‚Ø¨Ù„ Ø·Ù„Ø¨ Ø±Ù…Ø² Ø¬Ø¯ÙŠØ¯', en:'Please wait before requesting a new code' },
+  toastOrderAccepted: { ar:'âœ… Ù‚Ø¨Ù„Øª Ø§Ù„Ø·Ù„Ø¨ â€” ÙÙŠ Ø·Ø±ÙŠÙ‚Ùƒ Ù„Ù„Ø²Ø¨ÙˆÙ†', en:'âœ… Order accepted â€” on your way' },
+  toastOrderDone:     { ar:'âœ… ØªÙ… Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø·Ù„Ø¨',              en:'âœ… Order completed' },
+  available:          { ar:'Ù…ØªØ§Ø­',                          en:'Available' },
+  onlineToastOn:      { ar:'ðŸŸ¢ Ø£Ù†Øª Ù…ØªØ§Ø­ Ø§Ù„Ø¢Ù† Ù„Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø·Ù„Ø¨Ø§Øª', en:'ðŸŸ¢ You are now available for jobs' },
+  onlineToastOff:     { ar:'ðŸ”´ Ø£Ù†Øª ØºÙŠØ± Ù…ØªØ§Ø­',                en:'ðŸ”´ You are unavailable' }
 };
+
+function t(key){ return I18N[key] ? I18N[key][currentLang] : key; }
 
 function toggleLang(){
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -527,11 +552,11 @@ function applyLang(lang){
 }
 setTimeout(function(){ applyLang(currentLang); }, 0);
 
-// ══════════════════════════════════════
-// SPLASH → AUTH (بعد 2.5 ثانية)
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// SPLASH â†’ AUTH (Ø¨Ø¹Ø¯ 2.5 Ø«Ø§Ù†ÙŠØ©)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 setTimeout(function(){
-  // تحقق من جلسة محفوظة
+  // ØªØ­Ù‚Ù‚ Ù…Ù† Ø¬Ù„Ø³Ø© Ù…Ø­ÙÙˆØ¸Ø©
   var saved = localStorage.getItem('tl_tech_session');
   if(saved){
     try{
@@ -551,7 +576,7 @@ setTimeout(function(){
 }, 2500);
 
 function showScreen(id){
-  // أخفِ كل الشاشات بشكل قاطع
+  // Ø£Ø®ÙÙ ÙƒÙ„ Ø§Ù„Ø´Ø§Ø´Ø§Øª Ø¨Ø´ÙƒÙ„ Ù‚Ø§Ø·Ø¹
   var screens=['splash','auth','pending','app'];
   screens.forEach(function(sid){
     var s=document.getElementById(sid);
@@ -560,7 +585,7 @@ function showScreen(id){
       s.classList.remove('on');
     }
   });
-  // أظهر الشاشة المطلوبة فقط
+  // Ø£Ø¸Ù‡Ø± Ø§Ù„Ø´Ø§Ø´Ø© Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø© ÙÙ‚Ø·
   var el=document.getElementById(id);
   if(el){
     el.style.cssText='display:block!important';
@@ -569,9 +594,9 @@ function showScreen(id){
   }
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AUTH
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function authTab(tab){
   document.getElementById('form-login').style.display=tab==='login'?'block':'none';
   document.getElementById('form-reg').style.display=tab==='reg'?'block':'none';
@@ -579,14 +604,53 @@ function authTab(tab){
   document.getElementById('tab-reg').classList.toggle('on',tab==='reg');
 }
 
+var OTP_COOLDOWN_MS = 60000;
+function otpCooldownRemaining(phone){
+  var stored=null;
+  try{ stored=JSON.parse(sessionStorage.getItem('tl_otp_cooldown')||'null'); }catch(e){}
+  if(stored && stored.phone===phone){
+    var left=OTP_COOLDOWN_MS-(Date.now()-stored.ts);
+    if(left>0) return left;
+  }
+  return 0;
+}
+function otpCooldownSet(phone){
+  try{ sessionStorage.setItem('tl_otp_cooldown', JSON.stringify({phone:phone, ts:Date.now()})); }catch(e){}
+}
+
 function loginSend(){
   var ph=document.getElementById('l-phone').value.trim();
-  if(!ph||ph.length<10){showErr('l-err','أدخل رقم الجوال كاملاً');return;}
+  if(!ph||ph.length<10){showErr('l-err','Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ø§Ù„Ø¬ÙˆØ§Ù„ ÙƒØ§Ù…Ù„Ø§Ù‹');return;}
   currentPhone='+964'+(ph.startsWith('0')?ph.slice(1):ph);
+
+  if(otpCooldownRemaining(currentPhone)>0){
+    toast(t('toastOtpCooldown'),'err');
+    return;
+  }
+
+  if(USE_REAL_OTP){
+    if(!FB_READY){showErr('l-err','Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª');return;}
+    if(!window.recaptchaVerifier){
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size:'invisible'});
+    }
+    AUTH.signInWithPhoneNumber(currentPhone, window.recaptchaVerifier).then(function(confirmationResult){
+      window.confirmationResult = confirmationResult;
+      otpCooldownSet(currentPhone);
+      document.getElementById('l-send-btn').style.display='none';
+      document.getElementById('l-otp-section').style.display='block';
+      document.getElementById('o1').focus();
+      toast('ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚','ok');
+    }).catch(function(err){
+      toast('ØªØ¹Ø°Ø± Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø±Ù…Ø²: '+err.message,'err');
+    });
+    return;
+  }
+
+  otpCooldownSet(currentPhone);
   document.getElementById('l-send-btn').style.display='none';
   document.getElementById('l-otp-section').style.display='block';
   document.getElementById('o1').focus();
-  toast('رمز التحقق التجريبي: 123456','ok');
+  toast('Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚ Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠ: 123456','ok');
 }
 
 function om(el,next){if(el.value.length===1)document.getElementById(next)?.focus();}
@@ -594,21 +658,49 @@ function otpDone(){setTimeout(loginVerify,100);}
 
 function loginVerify(){
   var code=['o1','o2','o3','o4','o5','o6'].map(function(id){return document.getElementById(id).value;}).join('');
-  if(code.length<6){showErr('l-err','أدخل الرمز كاملاً');return;}
-  if(DEMO&&code!=='123456'){
-    showErr('l-err','الرمز غير صحيح — استخدم 123456');
+  if(code.length<6){showErr('l-err','Ø£Ø¯Ø®Ù„ Ø§Ù„Ø±Ù…Ø² ÙƒØ§Ù…Ù„Ø§Ù‹');return;}
+
+  if(USE_REAL_OTP){
+    if(!window.confirmationResult){ showErr('l-err','Ø£Ø¹Ø¯ Ø¥Ø±Ø³Ø§Ù„ Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚'); return; }
+    window.confirmationResult.confirm(code).then(function(result){
+      searchTechByUid(result.user.uid);
+    }).catch(function(){
+      showErr('l-err','Ø§Ù„Ø±Ù…Ø² ØºÙŠØ± ØµØ­ÙŠØ­');
+      ['o1','o2','o3','o4','o5','o6'].forEach(function(id){document.getElementById(id).value='';});
+      document.getElementById('o1').focus();
+    });
+    return;
+  }
+
+  if(code!=='123456'){
+    showErr('l-err','Ø§Ù„Ø±Ù…Ø² ØºÙŠØ± ØµØ­ÙŠØ­ â€” Ø§Ø³ØªØ®Ø¯Ù… 123456');
     ['o1','o2','o3','o4','o5','o6'].forEach(function(id){document.getElementById(id).value='';});
     document.getElementById('o1').focus();
     return;
   }
-  // ابحث عن الفني في Firebase
+  // Ø§Ø¨Ø­Ø« Ø¹Ù† Ø§Ù„ÙÙ†ÙŠ ÙÙŠ Firebase
   searchTechByPhone(currentPhone);
 }
 
+function searchTechByUid(uid){
+  toast('ðŸ” Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¨Ø­Ø«...','');
+  if(!FB_READY){showErr('l-err','Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª');return;}
+  DB.collection('techs').doc(uid).get().then(function(doc){
+    if(doc.exists){
+      techData=Object.assign({docId:doc.id},doc.data());
+      localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+      handleTechStatus();
+    } else {
+      showErr('l-err','Ø±Ù‚Ù…Ùƒ ØºÙŠØ± Ù…Ø³Ø¬Ù„ ÙƒÙÙ†ÙŠ â€” Ø³Ø¬Ù‘Ù„ Ø­Ø³Ø§Ø¨Ø§Ù‹ Ø¬Ø¯ÙŠØ¯Ø§Ù‹');
+      authTab('reg');
+    }
+  }).catch(function(e){showErr('l-err','Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø§ØªØµØ§Ù„: '+e.message);});
+}
+
 function searchTechByPhone(phone){
-  toast('🔍 جاري البحث...','');
-  if(!FB_READY){showErr('l-err','لا يوجد اتصال بالإنترنت');return;}
-  
+  toast('ðŸ” Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¨Ø­Ø«...','');
+  if(!FB_READY){showErr('l-err','Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª');return;}
+
   DB.collection('techs').where('phone','==',phone).get().then(function(snap){
     if(!snap.empty){
       var doc=snap.docs[0];
@@ -616,7 +708,7 @@ function searchTechByPhone(phone){
       localStorage.setItem('tl_tech_session',JSON.stringify(techData));
       handleTechStatus();
     } else {
-      // جرب بدون كود الدولة
+      // Ø¬Ø±Ø¨ Ø¨Ø¯ÙˆÙ† ÙƒÙˆØ¯ Ø§Ù„Ø¯ÙˆÙ„Ø©
       var phone2='0'+phone.slice(4);
       DB.collection('techs').where('phone','==',phone2).get().then(function(snap2){
         if(!snap2.empty){
@@ -625,12 +717,12 @@ function searchTechByPhone(phone){
           localStorage.setItem('tl_tech_session',JSON.stringify(techData));
           handleTechStatus();
         } else {
-          showErr('l-err','رقمك غير مسجل كفني — سجّل حساباً جديداً');
+          showErr('l-err','Ø±Ù‚Ù…Ùƒ ØºÙŠØ± Ù…Ø³Ø¬Ù„ ÙƒÙÙ†ÙŠ â€” Ø³Ø¬Ù‘Ù„ Ø­Ø³Ø§Ø¨Ø§Ù‹ Ø¬Ø¯ÙŠØ¯Ø§Ù‹');
           authTab('reg');
         }
       });
     }
-  }).catch(function(e){showErr('l-err','خطأ في الاتصال: '+e.message);});
+  }).catch(function(e){showErr('l-err','Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø§ØªØµØ§Ù„: '+e.message);});
 }
 
 function handleTechStatus(){
@@ -638,7 +730,7 @@ function handleTechStatus(){
     showScreen('app');
     initApp();
   } else if(techData.status==='blocked'){
-    showErr('l-err','حسابك موقوف — تواصل مع الإدارة');
+    showErr('l-err','Ø­Ø³Ø§Ø¨Ùƒ Ù…ÙˆÙ‚ÙˆÙ â€” ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©');
   } else {
     showScreen('pending');
   }
@@ -648,11 +740,11 @@ function register(){
   var name=document.getElementById('r-name').value.trim();
   var ph=document.getElementById('r-phone').value.trim();
   var spec=document.getElementById('r-spec').value;
-  var city=document.getElementById('r-city').value.trim()||'بغداد';
-  if(!name){showErr('r-err','أدخل اسمك');return;}
-  if(!ph||ph.length<10){showErr('r-err','أدخل رقم الجوال كاملاً');return;}
-  if(!FB_READY){showErr('r-err','لا يوجد اتصال بالإنترنت');return;}
-  
+  var city=document.getElementById('r-city').value.trim()||'Ø¨ØºØ¯Ø§Ø¯';
+  if(!name){showErr('r-err','Ø£Ø¯Ø®Ù„ Ø§Ø³Ù…Ùƒ');return;}
+  if(!ph||ph.length<10){showErr('r-err','Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ø§Ù„Ø¬ÙˆØ§Ù„ ÙƒØ§Ù…Ù„Ø§Ù‹');return;}
+  if(!FB_READY){showErr('r-err','Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª');return;}
+
   var phone='+964'+(ph.startsWith('0')?ph.slice(1):ph);
   var price=parseFloat(document.getElementById('r-price').value)||0;
   var data={
@@ -661,13 +753,27 @@ function register(){
     wallet:0,ordersCount:0,status:'pending',
     createdAt:new Date().toISOString()
   };
+
+  if(USE_REAL_OTP){
+    var authUser = AUTH.currentUser;
+    if(!authUser){ showErr('r-err','ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø±Ù‚Ù… Ø§Ù„Ø¬ÙˆØ§Ù„ Ø£ÙˆÙ„Ø§Ù‹ Ø¹Ø¨Ø± Ø´Ø§Ø´Ø© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„'); return; }
+    DB.collection('techs').doc(authUser.uid).set(data,{merge:true}).then(function(){
+      data.docId=authUser.uid;
+      techData=data;
+      localStorage.setItem('tl_tech_session',JSON.stringify(techData));
+      showScreen('pending');
+      toast('âœ… ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ ØªØ³Ø¬ÙŠÙ„Ùƒ!','ok');
+    }).catch(function(e){showErr('r-err','Ø®Ø·Ø£: '+e.message);});
+    return;
+  }
+
   DB.collection('techs').add(data).then(function(ref){
     data.docId=ref.id;
     techData=data;
     localStorage.setItem('tl_tech_session',JSON.stringify(techData));
     showScreen('pending');
-    toast('✅ تم إرسال طلب تسجيلك!','ok');
-  }).catch(function(e){showErr('r-err','خطأ: '+e.message);});
+    toast('âœ… ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ ØªØ³Ø¬ÙŠÙ„Ùƒ!','ok');
+  }).catch(function(e){showErr('r-err','Ø®Ø·Ø£: '+e.message);});
 }
 
 function checkActivation(){
@@ -679,9 +785,9 @@ function checkActivation(){
       if(techData.status==='active'){
         showScreen('app');
         initApp();
-        toast('✅ تم تفعيل حسابك!','ok');
+        toast('âœ… ØªÙ… ØªÙØ¹ÙŠÙ„ Ø­Ø³Ø§Ø¨Ùƒ!','ok');
       } else {
-        toast('لا يزال قيد المراجعة','');
+        toast('Ù„Ø§ ÙŠØ²Ø§Ù„ Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©','');
       }
     }
   });
@@ -689,10 +795,10 @@ function checkActivation(){
 
 function showErr(id,msg){document.getElementById(id).textContent=msg;}
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // APP
-// ══════════════════════════════════════
-var COMMISSION_RATE = 0.10; // 10% افتراضي
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+var COMMISSION_RATE = 0.10; // 10% Ø§ÙØªØ±Ø§Ø¶ÙŠ
 
 function loadSystemSettings(){
   if(!FB_READY) return;
@@ -709,27 +815,27 @@ var techDocUnsub = null;
 function initApp(){
   loadSystemSettings();
   listenTechDoc();
-  var ini=(techData.name||'ف').charAt(0);
+  var ini=(techData.name||'Ù').charAt(0);
   document.getElementById('tech-av').textContent=ini;
   document.getElementById('tech-name-sm').textContent=techData.name||'';
   document.getElementById('prof-av').textContent=ini;
-  document.getElementById('prof-name').textContent=techData.name||'—';
-  document.getElementById('prof-spec').textContent=SVC[techData.service||techData.spec]||'—';
-  document.getElementById('prof-phone').textContent=techData.phone||'—';
+  document.getElementById('prof-name').textContent=techData.name||'â€”';
+  document.getElementById('prof-spec').textContent=SVC[techData.service||techData.spec]||'â€”';
+  document.getElementById('prof-phone').textContent=techData.phone||'â€”';
   document.getElementById('st-wallet').textContent=(techData.wallet||0).toLocaleString('ar-IQ');
   document.getElementById('w-balance').textContent=(techData.wallet||0).toLocaleString('ar-IQ');
 
-  // تفعيل وضع متاح تلقائياً
+  // ØªÙØ¹ÙŠÙ„ ÙˆØ¶Ø¹ Ù…ØªØ§Ø­ ØªÙ„Ù‚Ø§Ø¦ÙŠØ§Ù‹
   toggleOnline(true);
 
-  // استمع للطلبات
+  // Ø§Ø³ØªÙ…Ø¹ Ù„Ù„Ø·Ù„Ø¨Ø§Øª
   listenOrders();
   loadTechNotifs();
 }
 
-// ══════════════════════════════════════
-// LIVE TECH DOC LISTENER (يعكس تحديثات لوحة التحكم فوراً)
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LIVE TECH DOC LISTENER (ÙŠØ¹ÙƒØ³ ØªØ­Ø¯ÙŠØ«Ø§Øª Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ… ÙÙˆØ±Ø§Ù‹)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function listenTechDoc(){
   if(!FB_READY || !techData || !techData.docId) return;
   if(techDocUnsub) techDocUnsub();
@@ -740,15 +846,15 @@ function listenTechDoc(){
     techData = fresh;
     localStorage.setItem('tl_tech_session', JSON.stringify(techData));
 
-    // حدّث الواجهة فوراً
+    // Ø­Ø¯Ù‘Ø« Ø§Ù„ÙˆØ§Ø¬Ù‡Ø© ÙÙˆØ±Ø§Ù‹
     var wEl = document.getElementById('st-wallet');
     var wEl2 = document.getElementById('w-balance');
     if(wEl) wEl.textContent = (techData.wallet||0).toLocaleString('ar-IQ');
     if(wEl2) wEl2.textContent = (techData.wallet||0).toLocaleString('ar-IQ');
 
-    // إذا تغيّرت الحالة (تعطيل/رفض) أثناء الاستخدام، أخرجه فوراً
+    // Ø¥Ø°Ø§ ØªØºÙŠÙ‘Ø±Øª Ø§Ù„Ø­Ø§Ù„Ø© (ØªØ¹Ø·ÙŠÙ„/Ø±ÙØ¶) Ø£Ø«Ù†Ø§Ø¡ Ø§Ù„Ø§Ø³ØªØ®Ø¯Ø§Ù…ØŒ Ø£Ø®Ø±Ø¬Ù‡ ÙÙˆØ±Ø§Ù‹
     if(oldStatus === 'active' && (techData.status === 'blocked' || techData.status === 'rejected')){
-      toast('🔒 تم تعطيل حسابك من قبل الإدارة','err');
+      toast('ðŸ”’ ØªÙ… ØªØ¹Ø·ÙŠÙ„ Ø­Ø³Ø§Ø¨Ùƒ Ù…Ù† Ù‚Ø¨Ù„ Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©','err');
       setTimeout(function(){
         if(techDocUnsub) techDocUnsub();
         showScreen('pending');
@@ -757,34 +863,34 @@ function listenTechDoc(){
   }, function(){});
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ONLINE TOGGLE
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function toggleOnline(forceOn){
   if(forceOn===true) isOnline=true;
   else isOnline=!isOnline;
   
   document.getElementById('online-dot').classList.toggle('on',isOnline);
-  document.getElementById('online-txt').textContent=isOnline?'متاح':'غير متاح';
-  
+  document.getElementById('online-txt').textContent=isOnline?t('available'):t('unavailable');
+
   if(isOnline){
     listenOrders();
-    toast('🟢 أنت متاح الآن لاستقبال الطلبات','ok');
+    toast(t('onlineToastOn'),'ok');
   } else {
     if(ordersUnsub){ordersUnsub();ordersUnsub=null;}
     renderIncoming([]);
-    toast('🔴 أنت غير متاح','');
+    toast(t('onlineToastOff'),'');
   }
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // LISTEN ORDERS
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function listenOrders(){
   if(!FB_READY||!isOnline) return;
   if(ordersUnsub){ordersUnsub();ordersUnsub=null;}
 
-  // استمع للطلبات المعلقة
+  // Ø§Ø³ØªÙ…Ø¹ Ù„Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…Ø¹Ù„Ù‚Ø©
   ordersUnsub = DB.collection('orders')
     .where('status','==','pending')
     .onSnapshot(function(snap){
@@ -799,7 +905,7 @@ function listenOrders(){
       });
     });
 
-  // استمع للطلبات النشطة
+  // Ø§Ø³ØªÙ…Ø¹ Ù„Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©
   if(activeUnsub){activeUnsub();activeUnsub=null;}
   activeUnsub = DB.collection('orders')
     .where('techDocId','==',techData.docId)
@@ -809,7 +915,7 @@ function listenOrders(){
       renderActive(active);
     }, function(){});
 
-  // استمع للسجل
+  // Ø§Ø³ØªÙ…Ø¹ Ù„Ù„Ø³Ø¬Ù„
   if(historyUnsub){historyUnsub();historyUnsub=null;}
   historyUnsub = DB.collection('orders')
     .where('techDocId','==',techData.docId)
@@ -822,34 +928,34 @@ function listenOrders(){
     }, function(){});
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // RENDER
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderIncoming(orders){
   var el=document.getElementById('incoming-list');
   if(!el) return;
   if(!orders.length){
-    el.innerHTML='<div class="empty"><div class="empty-ic">📭</div><div>لا توجد طلبات جديدة</div></div>';
+    el.innerHTML='<div class="empty"><div class="empty-ic">ðŸ“­</div><div>'+t('noNewOrders')+'</div></div>';
     return;
   }
-  // رنين
+  // Ø±Ù†ÙŠÙ†
   playSound();
   el.innerHTML=orders.map(function(o){
     var isBook=o.type==='book';
     return '<div class="order-card incoming">'+
-      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
-      '<span class="tag tag-pending"><span class="tdot"></span>انتظار</span></div>'+
-      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||o.service||'—')+'</div>'+
-      '<span class="oc-type '+(isBook?'type-book':'type-now')+'">'+(isBook?'📅 حجز مسبق':'⚡ طلب آني')+'</span>'+
+      '<div class="oc-head"><span class="oc-id">'+esc(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag tag-pending"><span class="tdot"></span>'+t('waiting')+'</span></div>'+
+      '<div class="oc-svc">'+esc(o.serviceLabel||SVC[o.service]||o.service||'â€”')+'</div>'+
+      '<span class="oc-type '+(isBook?'type-book':'type-now')+'">'+(isBook?'ðŸ“… Ø­Ø¬Ø² Ù…Ø³Ø¨Ù‚':'âš¡ Ø·Ù„Ø¨ Ø¢Ù†ÙŠ')+'</span>'+
       '<div class="oc-info">'+
-      '<span>👤 '+(o.custName||o.custPhone||'—')+'</span>'+
-      '<span>💵 الدفع: '+(o.pay==='wallet'?'محفظة':'نقداً')+'</span>'+
-      (isBook?'<span>📅 موعد: '+o.datetime?.replace('T',' ')+'</span>':'')+
-      (o.desc&&o.desc!=='—'?'<span>📝 '+o.desc+'</span>':'')+
+      '<span>ðŸ‘¤ '+esc(o.custName||o.custPhone||'â€”')+'</span>'+
+      '<span>ðŸ’µ Ø§Ù„Ø¯ÙØ¹: '+(o.pay==='wallet'?'Ù…Ø­ÙØ¸Ø©':'Ù†Ù‚Ø¯Ø§Ù‹')+'</span>'+
+      (isBook?'<span>ðŸ“… Ù…ÙˆØ¹Ø¯: '+esc(o.datetime?o.datetime.replace('T',' '):'')+'</span>':'')+
+      (o.desc&&o.desc!=='â€”'?'<span>ðŸ“ '+esc(o.desc)+'</span>':'')+
       '</div>'+
       '<div class="oc-btns">'+
-      '<button class="oc-btn oc-btn-accept" onclick="acceptOrder(\''+o.docId+'\',\''+o.custPhone+'\','+(o.lat||0)+','+(o.lng||0)+')">✅ قبول</button>'+
-      '<button class="oc-btn oc-btn-reject" onclick="rejectOrder(\''+o.docId+'\')">✕ رفض</button>'+
+      '<button class="oc-btn oc-btn-accept accept-btn" data-doc-id="'+esc(o.docId)+'" data-phone="'+esc(o.custPhone||'')+'" data-lat="'+esc(o.lat||0)+'" data-lng="'+esc(o.lng||0)+'">'+t('accept')+'</button>'+
+      '<button class="oc-btn oc-btn-reject reject-btn" data-doc-id="'+esc(o.docId)+'">'+t('reject')+'</button>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -859,20 +965,20 @@ function renderActive(orders){
   var el=document.getElementById('active-list');
   if(!el) return;
   if(!orders.length){
-    el.innerHTML='<div class="empty"><div class="empty-ic">🔧</div><div>لا توجد طلبات نشطة</div></div>';
+    el.innerHTML='<div class="empty"><div class="empty-ic">ðŸ”§</div><div>'+t('noActiveJobs')+'</div></div>';
     return;
   }
   el.innerHTML=orders.map(function(o){
     return '<div class="order-card">'+
-      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
-      '<span class="tag tag-prog"><span class="tdot"></span>جارٍ</span></div>'+
-      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||'—')+'</div>'+
-      '<div class="oc-info"><span>👤 '+(o.custName||o.custPhone||'—')+'</span></div>'+
+      '<div class="oc-head"><span class="oc-id">'+esc(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag tag-prog"><span class="tdot"></span>'+t('inProgress')+'</span></div>'+
+      '<div class="oc-svc">'+esc(o.serviceLabel||SVC[o.service]||'â€”')+'</div>'+
+      '<div class="oc-info"><span>ðŸ‘¤ '+esc(o.custName||o.custPhone||'â€”')+'</span></div>'+
       '<div class="oc-btns">'+
-      (o.lat?'<button class="oc-btn oc-btn-nav" onclick="startNav('+o.lat+','+o.lng+')">🗺️ ملاحة</button>':'')+
-      (o.custPhone?'<a class="oc-btn oc-btn-call" href="tel:'+o.custPhone+'">📞</a>':'')+
-      '<button class="oc-btn" style="background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)" data-order="'+o.docId+'" onclick="openTechChatBtn(this)">💬</button>'+
-      '<button class="oc-btn oc-btn-done" onclick="completeOrder(\''+o.docId+'\',' +(o.amount||0)+')">✅ إتمام</button>'+
+      (o.lat?'<button class="oc-btn oc-btn-nav nav-btn" data-lat="'+esc(o.lat)+'" data-lng="'+esc(o.lng)+'">'+t('navigateBtn')+'</button>':'')+
+      (o.custPhone?'<a class="oc-btn oc-btn-call tel-btn" href="#" data-phone="'+esc(o.custPhone)+'">ðŸ“ž</a>':'')+
+      '<button class="oc-btn chat-btn" style="background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)" data-order="'+esc(o.docId)+'">ðŸ’¬</button>'+
+      '<button class="oc-btn oc-btn-done done-btn" data-doc-id="'+esc(o.docId)+'" data-amount="'+esc(o.amount||0)+'">'+t('complete')+'</button>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -882,73 +988,110 @@ function renderHistory(orders){
   var el=document.getElementById('history-list');
   if(!el) return;
   if(!orders.length){
-    el.innerHTML='<div class="empty"><div class="empty-ic">📋</div><div>لا يوجد سجل بعد</div></div>';
+    el.innerHTML='<div class="empty"><div class="empty-ic">ðŸ“‹</div><div>'+t('noHistory')+'</div></div>';
     return;
   }
   var tagMap={done:'tag-done',cancelled:'tag-cancel'};
-  var lblMap={done:'مكتمل',cancelled:'ملغي'};
+  var lblMap={done:t('done'),cancelled:t('cancelled')};
   el.innerHTML=orders.slice(0,30).map(function(o){
     return '<div class="order-card">'+
-      '<div class="oc-head"><span class="oc-id">'+(o.id||o.docId.slice(0,8))+'</span>'+
-      '<span class="tag '+(tagMap[o.status]||'')+'">'+(lblMap[o.status]||o.status)+'</span></div>'+
-      '<div class="oc-svc">'+(o.serviceLabel||SVC[o.service]||'—')+'</div>'+
+      '<div class="oc-head"><span class="oc-id">'+esc(o.id||o.docId.slice(0,8))+'</span>'+
+      '<span class="tag '+(tagMap[o.status]||'')+'">'+esc(lblMap[o.status]||o.status)+'</span></div>'+
+      '<div class="oc-svc">'+esc(o.serviceLabel||SVC[o.service]||'â€”')+'</div>'+
       '<div class="oc-info">'+
-      '<span>👤 '+(o.custName||o.custPhone||'—')+'</span>'+
-      (o.commission?'<span>💰 عمولة: '+o.commission.toLocaleString('ar-IQ')+' د.ع</span>':'')+
-      '<span>📅 '+( o.dateStr||''  )+'</span>'+
+      '<span>ðŸ‘¤ '+esc(o.custName||o.custPhone||'â€”')+'</span>'+
+      (o.commission?'<span>ðŸ’° Ø¹Ù…ÙˆÙ„Ø©: '+esc(o.commission.toLocaleString('ar-IQ'))+' Ø¯.Ø¹</span>':'')+
+      '<span>ðŸ“… '+esc(o.dateStr||'')+'</span>'+
       '</div>'+
     '</div>';
   }).join('');
 }
 
-// ══════════════════════════════════════
+(function bindOrderListDelegation(){
+  var incEl = document.getElementById('incoming-list');
+  if(incEl) incEl.addEventListener('click', function(e){
+    var b = e.target.closest('.accept-btn');
+    if(b){ acceptOrder(b.dataset.docId, b.dataset.phone, parseFloat(b.dataset.lat)||0, parseFloat(b.dataset.lng)||0); return; }
+    b = e.target.closest('.reject-btn');
+    if(b){ rejectOrder(b.dataset.docId); return; }
+  });
+  var actEl = document.getElementById('active-list');
+  if(actEl) actEl.addEventListener('click', function(e){
+    var b = e.target.closest('.nav-btn');
+    if(b){ startNav(parseFloat(b.dataset.lat)||0, parseFloat(b.dataset.lng)||0); return; }
+    b = e.target.closest('.tel-btn');
+    if(b){ e.preventDefault(); window.location.href='tel:'+b.dataset.phone; return; }
+    b = e.target.closest('.chat-btn');
+    if(b){ openTechChatBtn(b); return; }
+    b = e.target.closest('.done-btn');
+    if(b){ completeOrder(b.dataset.docId, parseFloat(b.dataset.amount)||0); return; }
+  });
+})();
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ORDER ACTIONS
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function acceptOrder(docId,custPhone,lat,lng){
-  if(!FB_READY){toast('لا يوجد اتصال','err');return;}
-  DB.collection('orders').doc(docId).update({
-    status:'inprogress',
-    techDocId: techData.docId,
-    techName: techData.name,
-    techPhone: techData.phone,
-    acceptedAt: new Date().toISOString()
+  if(!FB_READY){toast(t('toastNoConnection'),'err');return;}
+  var ref = DB.collection('orders').doc(docId);
+  DB.runTransaction(function(tx){
+    return tx.get(ref).then(function(doc){
+      if(!doc.exists || doc.data().techDocId || doc.data().status!=='pending'){
+        throw new Error('TAKEN');
+      }
+      tx.update(ref, {
+        status:'inprogress',
+        techDocId: techData.docId,
+        techName: techData.name,
+        techPhone: techData.phone,
+        acceptedAt: new Date().toISOString()
+      });
+    });
   }).then(function(){
     activeOrderId=docId;
-    toast('✅ قبلت الطلب — في طريقك للزبون','ok');
+    toast(t('toastOrderAccepted'),'ok');
     startTracking(docId);
     if(lat&&lng){ startNav(lat,lng); goTab('map'); }
-  }).catch(function(e){toast('خطأ: '+e.message,'err');});
+  }).catch(function(e){
+    toast(e.message==='TAKEN' ? t('toastOrderTaken') : 'Ø®Ø·Ø£: '+e.message, 'err');
+  });
 }
 
-// ══════════════════════════════════════
-// LIVE PATH TRACKING (تسجيل مسار الفني)
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LIVE PATH TRACKING (ØªØ³Ø¬ÙŠÙ„ Ù…Ø³Ø§Ø± Ø§Ù„ÙÙ†ÙŠ)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function startTracking(orderId){
   if(!navigator.geolocation){
-    toast('⚠️ متصفحك لا يدعم تحديد الموقع — لن يُسجَّل المسار','err');
+    toast('âš ï¸ Ù…ØªØµÙØ­Ùƒ Ù„Ø§ ÙŠØ¯Ø¹Ù… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹ â€” Ù„Ù† ÙŠÙØ³Ø¬ÙŽÙ‘Ù„ Ø§Ù„Ù…Ø³Ø§Ø±','err');
     return;
   }
   if(!FB_READY){
-    toast('⚠️ لا يوجد اتصال — لن يُسجَّل المسار','err');
+    toast('âš ï¸ Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ â€” Ù„Ù† ÙŠÙØ³Ø¬ÙŽÙ‘Ù„ Ø§Ù„Ù…Ø³Ø§Ø±','err');
     return;
   }
   stopTracking();
   trackPath = [];
-  toast('📍 بدأ تسجيل المسار...','ok');
+  toast('ðŸ“ Ø¨Ø¯Ø£ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù…Ø³Ø§Ø±...','ok');
   var pointCount = 0;
   var lastSaveTime = 0;
   var firstPointSaved = false;
+  var pathPointsSent = 0;
+  var PATH_CAP = 2000;
 
   function savePoint(point){
-    DB.collection('orders').doc(orderId).update({
+    var updateData = {
       techCurrentLat: point.lat,
-      techCurrentLng: point.lng,
-      techPath: firebase.firestore.FieldValue.arrayUnion(point)
-    }).then(function(){
-      console.log('✅ نقطة مسار محفوظة #'+pointCount, point);
+      techCurrentLng: point.lng
+    };
+    if(pathPointsSent < PATH_CAP){
+      updateData.techPath = firebase.firestore.FieldValue.arrayUnion(point);
+      pathPointsSent++;
+    }
+    DB.collection('orders').doc(orderId).update(updateData).then(function(){
+      console.log('âœ… Ù†Ù‚Ø·Ø© Ù…Ø³Ø§Ø± Ù…Ø­ÙÙˆØ¸Ø© #'+pointCount, point);
     }).catch(function(err){
-      console.error('❌ فشل حفظ نقطة المسار:', err.message);
-      toast('⚠️ فشل تسجيل الموقع: '+err.message,'err');
+      console.error('âŒ ÙØ´Ù„ Ø­ÙØ¸ Ù†Ù‚Ø·Ø© Ø§Ù„Ù…Ø³Ø§Ø±:', err.message);
+      toast('âš ï¸ ÙØ´Ù„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ù…ÙˆÙ‚Ø¹: '+err.message,'err');
     });
   }
 
@@ -957,7 +1100,7 @@ function startTracking(orderId){
     trackPath.push(point);
     pointCount++;
 
-    // احفظ أول نقطة فوراً دائماً (بداية المسار)، ثم كل 8 ثوانٍ بعدها لتوفير حصة Firebase
+    // Ø§Ø­ÙØ¸ Ø£ÙˆÙ„ Ù†Ù‚Ø·Ø© ÙÙˆØ±Ø§Ù‹ Ø¯Ø§Ø¦Ù…Ø§Ù‹ (Ø¨Ø¯Ø§ÙŠØ© Ø§Ù„Ù…Ø³Ø§Ø±)ØŒ Ø«Ù… ÙƒÙ„ 8 Ø«ÙˆØ§Ù†Ù Ø¨Ø¹Ø¯Ù‡Ø§ Ù„ØªÙˆÙÙŠØ± Ø­ØµØ© Firebase
     var now = Date.now();
     if(!firstPointSaved){
       firstPointSaved = true;
@@ -970,7 +1113,7 @@ function startTracking(orderId){
     savePoint(point);
   }, function(err){
     console.warn('Tracking GPS error:', err.message);
-    toast('⚠️ تعذر تحديد موقعك: '+err.message,'err');
+    toast('âš ï¸ ØªØ¹Ø°Ø± ØªØ­Ø¯ÙŠØ¯ Ù…ÙˆÙ‚Ø¹Ùƒ: '+err.message,'err');
   }, {enableHighAccuracy:true, maximumAge:5000, timeout:10000});
 }
 
@@ -984,23 +1127,22 @@ function stopTracking(){
 function rejectOrder(docId){
   if(!FB_READY) return;
   DB.collection('orders').doc(docId).update({status:'cancelled'}).then(function(){
-    toast('تم رفض الطلب','');
+    toast('ØªÙ… Ø±ÙØ¶ Ø§Ù„Ø·Ù„Ø¨','');
   });
 }
 
 function completeOrder(docId,amount){
-  if(!FB_READY){toast('لا يوجد اتصال','err');return;}
-  // إذا لم تكن هناك قيمة، اطلب من الفني إدخالها
+  if(!FB_READY){toast('Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„','err');return;}
+  // Ø¥Ø°Ø§ Ù„Ù… ØªÙƒÙ† Ù‡Ù†Ø§Ùƒ Ù‚ÙŠÙ…Ø©ØŒ Ø§Ø·Ù„Ø¨ Ù…Ù† Ø§Ù„ÙÙ†ÙŠ Ø¥Ø¯Ø®Ø§Ù„Ù‡Ø§
   if(!amount || amount === 0){
-    var inputAmt = parseFloat(prompt('أدخل قيمة الطلب بالدينار العراقي:'));
+    var inputAmt = parseFloat(prompt('Ø£Ø¯Ø®Ù„ Ù‚ÙŠÙ…Ø© Ø§Ù„Ø·Ù„Ø¨ Ø¨Ø§Ù„Ø¯ÙŠÙ†Ø§Ø± Ø§Ù„Ø¹Ø±Ø§Ù‚ÙŠ:'));
     if(!inputAmt || isNaN(inputAmt) || inputAmt <= 0){
-      toast('يرجى إدخال قيمة صحيحة للطلب','err');
+      toast('ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ù‚ÙŠÙ…Ø© ØµØ­ÙŠØ­Ø© Ù„Ù„Ø·Ù„Ø¨','err');
       return;
     }
     amount = inputAmt;
   }
   var commission=Math.round((amount||0)*COMMISSION_RATE);
-  var newWallet=Math.max(0,(techData.wallet||0)-commission);
   DB.collection('orders').doc(docId).update({
     status:'done',
     amount:amount,
@@ -1008,18 +1150,18 @@ function completeOrder(docId,amount){
     completedAt:new Date().toISOString()
   }).then(function(){
     return DB.collection('techs').doc(techData.docId).update({
-      wallet:newWallet,
-      ordersCount:(techData.ordersCount||0)+1
+      wallet: firebase.firestore.FieldValue.increment(-commission),
+      ordersCount: firebase.firestore.FieldValue.increment(1)
     });
   }).then(function(){
-    techData.wallet=newWallet;
+    techData.wallet=Math.max(0,(techData.wallet||0)-commission);
     techData.ordersCount=(techData.ordersCount||0)+1;
     localStorage.setItem('tl_tech_session',JSON.stringify(techData));
-    document.getElementById('st-wallet').textContent=newWallet.toLocaleString('ar-IQ');
-    document.getElementById('w-balance').textContent=newWallet.toLocaleString('ar-IQ');
-    toast('✅ تم إتمام الطلب — عمولة '+commission.toLocaleString('ar-IQ')+' د.ع','ok');
+    document.getElementById('st-wallet').textContent=techData.wallet.toLocaleString('ar-IQ');
+    document.getElementById('w-balance').textContent=techData.wallet.toLocaleString('ar-IQ');
+    toast(t('toastOrderDone')+' â€” Ø¹Ù…ÙˆÙ„Ø© '+commission.toLocaleString('ar-IQ')+' Ø¯.Ø¹','ok');
     if(navRoute){try{navMap.removeLayer(navRoute);}catch(e){}navRoute=null;}
-    // احفظ آخر نقطة معروفة كنقطة نهاية صريحة للمسار قبل الإيقاف
+    // Ø§Ø­ÙØ¸ Ø¢Ø®Ø± Ù†Ù‚Ø·Ø© Ù…Ø¹Ø±ÙˆÙØ© ÙƒÙ†Ù‚Ø·Ø© Ù†Ù‡Ø§ÙŠØ© ØµØ±ÙŠØ­Ø© Ù„Ù„Ù…Ø³Ø§Ø± Ù‚Ø¨Ù„ Ø§Ù„Ø¥ÙŠÙ‚Ø§Ù
     if(trackPath.length){
       var lastPoint = trackPath[trackPath.length-1];
       DB.collection('orders').doc(docId).update({
@@ -1027,12 +1169,12 @@ function completeOrder(docId,amount){
       }).catch(function(){});
     }
     stopTracking();
-  }).catch(function(e){toast('خطأ: '+e.message,'err');});
+  }).catch(function(e){toast('Ø®Ø·Ø£: '+e.message,'err');});
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // NAVIGATION MAP
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function startNav(lat,lng){
   goTab('map');
   setTimeout(function(){
@@ -1040,13 +1182,13 @@ function startNav(lat,lng){
       var el=document.getElementById('nav-map');
       if(!el) return;
       navMap=L.map(el).setView([lat,lng],14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(navMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'Â© OSM'}).addTo(navMap);
     }
     navMap.invalidateSize();
     if(navRoute){try{navMap.removeLayer(navRoute);}catch(e){}}
     if(!navigator.geolocation){
       navMap.setView([lat,lng],15);
-      L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+      L.marker([lat,lng]).addTo(navMap).bindPopup('ðŸ“ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†').openPopup();
       return;
     }
     navigator.geolocation.getCurrentPosition(function(p){
@@ -1057,23 +1199,23 @@ function startNav(lat,lng){
           routeWhileDragging:false,
           lineOptions:{styles:[{color:'#f0a500',weight:5}]},
           createMarker:function(i,wp){
-            return L.marker(wp.latLng,{title:i===0?'موقعي':'الزبون'});
+            return L.marker(wp.latLng,{title:i===0?'Ù…ÙˆÙ‚Ø¹ÙŠ':'Ø§Ù„Ø²Ø¨ÙˆÙ†'});
           }
         }).addTo(navMap);
       }catch(e){
         navMap.setView([lat,lng],14);
-        L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+        L.marker([lat,lng]).addTo(navMap).bindPopup('ðŸ“ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†').openPopup();
       }
     },function(){
       navMap.setView([lat,lng],15);
-      L.marker([lat,lng]).addTo(navMap).bindPopup('📍 موقع الزبون').openPopup();
+      L.marker([lat,lng]).addTo(navMap).bindPopup('ðŸ“ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ†').openPopup();
     });
   },300);
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // NAVIGATION TABS
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function goTab(tab){
   document.querySelectorAll('.tab').forEach(function(t,i){
     var tabs=['home','history','map','wallet','profile','notifs'];
@@ -1084,12 +1226,12 @@ function goTab(tab){
   if(tab==='map') setTimeout(function(){navMap?.invalidateSize();},200);
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // LOGOUT & HELPERS
-// ══════════════════════════════════════
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // NOTIFICATIONS
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 var techNotifUnsub = null;
 var techSeenNotifs = [];
 
@@ -1111,14 +1253,14 @@ function loadTechNotifs(){
 function renderTechNotifs(notifs){
   var el = document.getElementById('notifs-list');
   if(!el) return;
-  if(!notifs.length){ el.innerHTML='<div class="empty"><div class="empty-ic">🔔</div><div>لا توجد إشعارات</div></div>'; return; }
+  if(!notifs.length){ el.innerHTML='<div class="empty"><div class="empty-ic">ðŸ””</div><div>'+t('noNotifications')+'</div></div>'; return; }
   el.innerHTML = notifs.map(function(n){
     var timeStr = n.ts ? new Date(n.ts).toLocaleString('ar-IQ') : '';
     return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px">'+
-      '<div style="font-size:14px;font-weight:700;margin-bottom:4px">📢 '+(n.title||n.message||'إشعار')+'</div>'+
-      (n.body?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+n.body+'</div>':'')+
-      (n.message && !n.title?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+n.message+'</div>':'')+
-      '<div style="font-size:11px;color:var(--muted)">'+timeStr+'</div>'+
+      '<div style="font-size:14px;font-weight:700;margin-bottom:4px">ðŸ“¢ '+esc(n.title||n.message||'Ø¥Ø´Ø¹Ø§Ø±')+'</div>'+
+      (n.body?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+esc(n.body)+'</div>':'')+
+      (n.message && !n.title?'<div style="font-size:13px;color:var(--muted);margin-bottom:6px">'+esc(n.message)+'</div>':'')+
+      '<div style="font-size:11px;color:var(--muted)">'+esc(timeStr)+'</div>'+
     '</div>';
   }).join('');
   techSeenNotifs = notifs.map(function(n){return n.docId;});
@@ -1126,6 +1268,7 @@ function renderTechNotifs(notifs){
 }
 
 function logout(){
+  stopTracking();
   localStorage.removeItem('tl_tech_session');
   techData=null;isOnline=false;
   if(ordersUnsub)ordersUnsub();
@@ -1134,9 +1277,9 @@ function logout(){
   showScreen('auth');
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // NEW ORDER (Tech creates for customer)
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 var noOrderMap = null, noOrderMarker = null, noOrderLat = null, noOrderLng = null;
 
 function openNewOrderModal(){
@@ -1146,7 +1289,7 @@ function openNewOrderModal(){
   document.getElementById('no-loc-search').value='';
   document.getElementById('no-amount').value='';
   document.getElementById('no-desc').value='';
-  document.getElementById('no-loc-status').textContent='اضغط على الخريطة أو ابحث لتحديد الموقع';
+  document.getElementById('no-loc-status').textContent='Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø±ÙŠØ·Ø© Ø£Ùˆ Ø§Ø¨Ø­Ø« Ù„ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹';
   noOrderLat=null; noOrderLng=null;
   setTimeout(initNoOrderMap, 250);
 }
@@ -1161,7 +1304,7 @@ function initNoOrderMap(){
   if(noOrderMap){ noOrderMap.remove(); noOrderMap=null; noOrderMarker=null; }
   var startLat = techData.lat || 33.3152, startLng = techData.lng || 44.3661;
   noOrderMap = L.map(el).setView([startLat,startLng],12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(noOrderMap);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'Â© OSM'}).addTo(noOrderMap);
   noOrderMap.on('click', function(e){
     setNoOrderLoc(e.latlng.lat, e.latlng.lng, null);
   });
@@ -1173,14 +1316,14 @@ function setNoOrderLoc(lat, lng, label){
   if(noOrderMarker){ noOrderMap.removeLayer(noOrderMarker); }
   noOrderMarker = L.marker([lat,lng]).addTo(noOrderMap);
   noOrderMap.setView([lat,lng],15);
-  document.getElementById('no-loc-status').innerHTML = '✅ '+(label?('<b>'+label+'</b>'):'تم تحديد الموقع')+' — <span style="font-family:monospace;color:var(--muted)">'+lat.toFixed(5)+', '+lng.toFixed(5)+'</span>';
+  document.getElementById('no-loc-status').innerHTML = 'âœ… '+(label?('<b>'+label+'</b>'):'ØªÙ… ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹')+' â€” <span style="font-family:monospace;color:var(--muted)">'+lat.toFixed(5)+', '+lng.toFixed(5)+'</span>';
 }
 
 function useMyLocationForOrder(){
-  if(!navigator.geolocation){ toast('GPS غير مدعوم','err'); return; }
+  if(!navigator.geolocation){ toast('GPS ØºÙŠØ± Ù…Ø¯Ø¹ÙˆÙ…','err'); return; }
   navigator.geolocation.getCurrentPosition(function(p){
-    setNoOrderLoc(p.coords.latitude, p.coords.longitude, 'موقعي الحالي');
-  }, function(){ toast('تعذر تحديد الموقع','err'); });
+    setNoOrderLoc(p.coords.latitude, p.coords.longitude, 'Ù…ÙˆÙ‚Ø¹ÙŠ Ø§Ù„Ø­Ø§Ù„ÙŠ');
+  }, function(){ toast('ØªØ¹Ø°Ø± ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ù…ÙˆÙ‚Ø¹','err'); });
 }
 
 var noLocSearchTimeout = null;
@@ -1189,22 +1332,22 @@ function searchNoLocation(query){
   var dd = document.getElementById('no-loc-dd');
   if(!query || query.trim().length < 3){ dd.style.display='none'; return; }
   noLocSearchTimeout = setTimeout(function(){
-    var q = encodeURIComponent(query + ' العراق');
+    var q = encodeURIComponent(query + ' Ø§Ù„Ø¹Ø±Ø§Ù‚');
     fetch('https://nominatim.openstreetmap.org/search?format=json&q='+q+'&limit=6&accept-language=ar')
       .then(function(r){ return r.json(); })
       .then(function(results){
         if(!results.length){
-          dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--muted)">لا توجد نتائج</div>';
+          dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--muted)">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬</div>';
           dd.style.display='block'; return;
         }
         dd.innerHTML = results.map(function(r){
           var name = r.display_name;
           var safeName = name.replace(/'/g,"&#39;");
-          return '<div data-lat="'+r.lat+'" data-lng="'+r.lon+'" data-name="'+safeName+'" onclick="selectNoLocation(this)" style="padding:9px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--bd)">📍 '+name+'</div>';
+          return '<div data-lat="'+r.lat+'" data-lng="'+r.lon+'" data-name="'+safeName+'" onclick="selectNoLocation(this)" style="padding:9px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--bd)">ðŸ“ '+name+'</div>';
         }).join('');
         dd.style.display='block';
       }).catch(function(){
-        dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--red)">تعذر البحث</div>';
+        dd.innerHTML='<div style="padding:10px;font-size:12px;color:var(--red)">ØªØ¹Ø°Ø± Ø§Ù„Ø¨Ø­Ø«</div>';
         dd.style.display='block';
       });
   }, 500);
@@ -1224,17 +1367,17 @@ function createTechOrder(){
   var custPhone = document.getElementById('no-cust-phone').value.trim();
   var service = document.getElementById('no-service').value;
   var amount = parseFloat(document.getElementById('no-amount').value)||0;
-  var desc = document.getElementById('no-desc').value.trim()||'—';
+  var desc = document.getElementById('no-desc').value.trim()||'â€”';
 
-  if(!custName){ toast('أدخل اسم الزبون','err'); return; }
-  if(!custPhone){ toast('أدخل رقم جوال الزبون','err'); return; }
-  if(!noOrderLat){ toast('حدد موقع الزبون على الخريطة','err'); return; }
-  if(!FB_READY){ toast('لا يوجد اتصال','err'); return; }
+  if(!custName){ toast('Ø£Ø¯Ø®Ù„ Ø§Ø³Ù… Ø§Ù„Ø²Ø¨ÙˆÙ†','err'); return; }
+  if(!custPhone){ toast('Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ø¬ÙˆØ§Ù„ Ø§Ù„Ø²Ø¨ÙˆÙ†','err'); return; }
+  if(!noOrderLat){ toast('Ø­Ø¯Ø¯ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø²Ø¨ÙˆÙ† Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø±ÙŠØ·Ø©','err'); return; }
+  if(!FB_READY){ toast('Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„','err'); return; }
 
   var now = new Date();
   var order = {
     id:'ORD-'+Math.random().toString(36).substr(2,6).toUpperCase(),
-    type:'now', typLabel:'طلب آني',
+    type:'now', typLabel:'Ø·Ù„Ø¨ Ø¢Ù†ÙŠ',
     custName:custName, custPhone:custPhone,
     service:service, serviceLabel:SVC[service]||service,
     techDocId:techData.docId, techName:techData.name, techPhone:techData.phone||'',
@@ -1248,13 +1391,13 @@ function createTechOrder(){
 
   DB.collection('orders').add(order).then(function(){
     closeNewOrderModal();
-    toast('✅ تم إنشاء الطلب وقبوله','ok');
-  }).catch(function(e){ toast('خطأ: '+e.message,'err'); });
+    toast('âœ… ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø·Ù„Ø¨ ÙˆÙ‚Ø¨ÙˆÙ„Ù‡','ok');
+  }).catch(function(e){ toast('Ø®Ø·Ø£: '+e.message,'err'); });
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CHAT
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 var currentChatId = null;
 var techChatUnsub = null;
 
@@ -1266,16 +1409,16 @@ function openTechChat(orderId){
   currentChatId = orderId;
   document.getElementById('chat-modal').style.display='flex';
   var el = document.getElementById('tech-chat-messages');
-  if(!FB_READY){ el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">لا يوجد اتصال</div>'; return; }
+  if(!FB_READY){ el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„</div>'; return; }
   if(techChatUnsub) techChatUnsub();
   techChatUnsub = DB.collection('chats').doc(orderId).collection('messages')
     .orderBy('ts','asc')
     .onSnapshot(function(snap){
-      if(snap.empty){ el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">لا توجد رسائل بعد</div>'; return; }
+      if(snap.empty){ el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø±Ø³Ø§Ø¦Ù„ Ø¨Ø¹Ø¯</div>'; return; }
       el.innerHTML = snap.docs.map(function(d){
         var m = d.data();
         var isMe = m.sender === 'tech';
-        return '<div class="msg '+(isMe?'msg-me':'msg-other')+'">'+m.text+'<div class="msg-time">'+(m.senderName||'')+'</div></div>';
+        return '<div class="msg '+(isMe?'msg-me':'msg-other')+'">'+esc(m.text)+'<div class="msg-time">'+esc(m.senderName||'')+'</div></div>';
       }).join('');
       el.scrollTop = el.scrollHeight;
     }, function(){});
@@ -1288,7 +1431,7 @@ function sendTechMsg(){
   DB.collection('chats').doc(currentChatId).collection('messages').add({
     text: text,
     sender: 'tech',
-    senderName: techData.name||'الفني',
+    senderName: techData.name||'Ø§Ù„ÙÙ†ÙŠ',
     ts: Date.now()
   });
   inp.value = '';
